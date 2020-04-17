@@ -1,0 +1,31 @@
+build
+deploy
+.gradle
+*.class
+*~
+*.bak
+*.off
+*.old
+.DS_Store
+
+# Package Files #
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# IDEA
+.idea
+*.iml
+*.ipr
+*.iws
+/target
+
+# Eclipse
+.classpath
+.project
+.settings
