@@ -5,7 +5,7 @@ It handles object instantiation and mapping values from bytes into annotated fie
 ![Build Status](https://travis-ci.com/trisquareeu/bytemapper.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/trisquareeu/bytemapper/badge.svg)](https://coveralls.io/github/trisquareeu/bytemapper)
 [![javadoc](https://javadoc.io/badge2/eu.trisquare/bytemapper/javadoc.svg)](https://javadoc.io/doc/eu.trisquare/bytemapper)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper/badge.svg)](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper)
+[![Maven Central](https://img.shields.io/maven-central/v/eu.trisquare/bytemapper.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.trisquare%22%20AND%20a:%22bytemapper%22)
 
 # Get ready
 Add following dependency to your projects POM:
@@ -16,6 +16,8 @@ Add following dependency to your projects POM:
     <version>0.1-ALPHA</version>
 </dependency> 
 ```
+For other build tools, please refer [here](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper). 
+You can also download jar files from [here](https://github.com/trisquareeu/bytemapper/releases).
 
 # How to use?
 ## Example
@@ -70,19 +72,30 @@ public class Main {
 
 ## Supported types
 Currently, supported types (and it's wrappers) are: 
-* **boolean** which is mapped to false if all selected bytes are zeroes, otherwise is mapped to true.
-* **byte** is assigned with same value as in data source. As only one data type is not converted into unsigned byte. 
-* **short**, which is mapped as big- or little-endian two bytes unsigned value. See disclaimer about signedness below.
-* **int**, which is mapped as big- or little-endian four bytes unsigned value. See disclaimer about signedness below.
+* **String** which is created from selected byte range. Size of single character is determined dynamically by UTF-8 standard.
+* **BigInteger** that can hold up to Integer.MAX_VALUE bytes of data.
+* **Byte[]** returns slice of datasource content as Byte objects array. This data type is **not** converted into unsigned values array. 
+* **byte[]** returns slice of datasource content. This data type is **not** converted into unsigned values array. 
 * **long**, which is mapped as big- or little-endian eight bytes unsigned value.  See disclaimer about signedness below.
-* **String** which is created from selected byte range. Size of single character is determined by UTF-8 standard.
-* **byte[]** returns slice of datasource content.
-* **Byte[]** returns slice of datasource content as Byte objects array.
+* **int**, which is mapped as big- or little-endian four bytes unsigned value. See disclaimer about signedness below.
+* **short**, which is mapped as big- or little-endian two bytes unsigned value. See disclaimer about signedness below.
+* **byte** is assigned with same value as in data source. This data type is **not** converted into unsigned value. 
+* **boolean** which is mapped to false if all selected bytes are zeroes, otherwise is mapped to true.
+
+Mapper will check if annotated field is assignable by one of above types and then perform conversions from bytes to that
+particular type. If given field is assignable by more than one of given types (good example is Object type that can be 
+assigned by virtually any from above list), first one will be used. For mentioned type Object, **String** instance will
+be returned, but for type Number, **BigInteger** will be used instead. If field is not assignable by any of above types,
+NoMapperFoundException will be thrown.
 
 ## Quick note on signedness
-Currently, this library supports only **unsigned** values. Even if maximum size allowed for **short** type is two bytes, 
-please keep in mind that maximum supported value is equal to 0x7FFF(=Short.MAX_VALUE) and values like 0xFFFF will exceed it. 
-Please consider this when choosing type for fields to avoid ArithmeticException. 
+Currently, this library supports only **unsigned** values for types other than **byte, byte[] and Byte[]**, which are
+stored as signed values. That's shorten every other data type value range to only non-negative half.
+
+**Example**:<br>
+Even if maximum size allowed for *short* type is two bytes,  maximum stored value is equal to  Short.MAX_VALUE (0x7FFF).
+Bigger values like 0xFFFF will exceed it, resulting in ArithmeticException. Exception to this rule are **byte, byte[] and Byte[]** 
+which are taken as-is from source buffer to allow developer handle signed values.
 
 # Licence 
 This project is under permissive, MIT licence. Please refer to LICENSE file for more details.

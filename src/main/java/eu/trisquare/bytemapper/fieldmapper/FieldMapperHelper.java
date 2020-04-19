@@ -2,6 +2,7 @@ package eu.trisquare.bytemapper.fieldmapper;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Helper class for ByteBuffer to specific Object coversion
@@ -62,6 +63,28 @@ public class FieldMapperHelper {
         return value.longValueExact();
     }
 
+    /**
+     * Converts selected ByteBuffer content range to unsigned BigInteger value.
+     */
+    static BigInteger toBigInteger(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
+        BigInteger value = BigInteger.ZERO;
+        for (int i = 0; i < size; i++) {
+            final int current = buffer.get(startByte + i) & 0xFF;
+            final int bitShift = isBigEndian ? ((size - i - 1) * 8) : (i * 8);
+            value = BigInteger
+                    .valueOf(current)
+                    .shiftLeft(bitShift)
+                    .add(value);
+        }
+        return value;
+    }
+
+    /**
+     * Converts given primitive byte array into String using UTF-8 charset
+     */
+    static String toString(byte[] source) {
+        return new String(source, StandardCharsets.UTF_8);
+    }
 
     /**
      * Converts given primitive byte array into Byte objects array
@@ -74,19 +97,4 @@ public class FieldMapperHelper {
         return destination;
     }
 
-    /**
-     * Converts selected ByteBuffer content range to unsigned BigInteger value.
-     */
-    private static BigInteger toBigInteger(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
-        BigInteger value = BigInteger.ZERO;
-        for (int i = 0; i < size; i++) {
-            final int current = buffer.get(startByte + i) & 0xFF;
-            final int bitShift = isBigEndian ? ((size - i - 1) * 8) : (i * 8);
-            value = BigInteger
-                    .valueOf(current)
-                    .shiftLeft(bitShift)
-                    .add(value);
-        }
-        return value;
-    }
 }

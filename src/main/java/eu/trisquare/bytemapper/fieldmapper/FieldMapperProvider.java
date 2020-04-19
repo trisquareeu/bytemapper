@@ -1,6 +1,7 @@
 package eu.trisquare.bytemapper.fieldmapper;
 
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,14 +18,18 @@ public class FieldMapperProvider {
 
     static {
         mappers = new ArrayList<>();
-        /* Default mapper for types assignable from String class (i.e. String, Object or CharSequence) */
-        mappers.add(new ArrayFieldMapper(String::new, String.class));
 
-        /* Default mapper for types assignable from byte[] class (i.e. byte[] and Object) */
-        mappers.add(new ArrayFieldMapper(bytes -> bytes, byte[].class));
+        /* Default mapper for types assignable from String class (i.e. String, Object or CharSequence) */
+        mappers.add(new ArrayFieldMapper(FieldMapperHelper::toString, String.class));
+
+        /* Default mapper for types assignable from Number class */
+        mappers.add(new SingleValueFieldMapper(FieldMapperHelper::toBigInteger, Integer.MAX_VALUE, BigInteger.class));
 
         /* Default mapper for types assignable from Byte[] class (i.e. Byte[], Object[] and Object) */
         mappers.add(new ArrayFieldMapper(FieldMapperHelper::toByteObjectArray, Byte[].class));
+
+        /* Default mapper for types assignable from byte[] class (i.e. byte[] and Object) */
+        mappers.add(new ArrayFieldMapper(bytes -> bytes, byte[].class));
 
         /* Default mapper for types assignable from long class (i.e. long, Long, Number and Object) */
         mappers.add(new SingleValueFieldMapper(FieldMapperHelper::toLong, Long.BYTES, long.class));

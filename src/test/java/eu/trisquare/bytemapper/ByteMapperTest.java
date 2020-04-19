@@ -4,6 +4,7 @@ import eu.trisquare.bytemapper.annotations.Value;
 import eu.trisquare.bytemapper.fieldmapper.NoMapperFoundException;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ByteMapperTest {
 
     private static final String TEST_STRING_VALUE = "1234";
-    private static final int TEST_STRING_LENGTH = 4;
 
     @Test
     void mapValuesShouldThrowExceptionWhenEmptyBuffer() {
@@ -137,13 +137,14 @@ class ByteMapperTest {
     @Test
     void testMapValues() {
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
-                .allocate(20)
-                .put((byte) 0x00)                                //0
-                .put((byte) 0xFF)                                //1
+                .allocate(28)
+                .put((byte) 0x00)                               //0
+                .put((byte) 0xFF)                               //1
                 .putShort(Short.MAX_VALUE)                      //2
                 .putInt(Integer.MAX_VALUE)                      //4
                 .putLong(Long.MAX_VALUE)                        //8
                 .put(TEST_STRING_VALUE.getBytes())              //16
+                .putLong(Long.MAX_VALUE)                        //20
                 .flip();
 
         final TestClasses.ValidMappingClass object = ByteMapper.mapValues(TestClasses.ValidMappingClass.class, buffer);
@@ -153,18 +154,20 @@ class ByteMapperTest {
         assertEquals(Integer.MAX_VALUE, object.intValue);
         assertEquals(Long.MAX_VALUE, object.longValue);
         assertEquals(TEST_STRING_VALUE, object.stringValue);
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE), object.bigInteger);
     }
 
     @Test
     void testMapValuesForExistingObject() {
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
-                .allocate(20)
-                .put((byte) 0x00)                                //0
-                .put((byte) 0xFF)                                //1
+                .allocate(28)
+                .put((byte) 0x00)                               //0
+                .put((byte) 0xFF)                               //1
                 .putShort(Short.MAX_VALUE)                      //2
                 .putInt(Integer.MAX_VALUE)                      //4
                 .putLong(Long.MAX_VALUE)                        //8
                 .put(TEST_STRING_VALUE.getBytes())              //16
+                .putLong(Long.MAX_VALUE)                        //20
                 .flip();
 
         final TestClasses.ValidMappingClass object = new TestClasses.ValidMappingClass();
@@ -175,6 +178,7 @@ class ByteMapperTest {
         assertEquals(Integer.MAX_VALUE, object.intValue);
         assertEquals(Long.MAX_VALUE, object.longValue);
         assertEquals(TEST_STRING_VALUE, object.stringValue);
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE), object.bigInteger);
     }
 
     private static class TestClasses {
@@ -236,7 +240,7 @@ class ByteMapperTest {
         }
 
         private static class UnknownTypeClass {
-            @Value(startByte = 0, size = TEST_STRING_LENGTH)
+            @Value(startByte = 0, size = 4)
             private Object object;
 
             public UnknownTypeClass() {
@@ -270,8 +274,11 @@ class ByteMapperTest {
             @Value(startByte = 8, size = 8)
             private long longValue;
 
-            @Value(startByte = 16, size = TEST_STRING_LENGTH)
+            @Value(startByte = 16, size = 4)
             private String stringValue;
+
+            @Value(startByte = 20, size = 8)
+            private BigInteger bigInteger;
 
             public ValidMappingClass() {
                 //empty

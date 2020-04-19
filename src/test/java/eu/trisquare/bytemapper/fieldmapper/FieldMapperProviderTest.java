@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -38,6 +39,10 @@ class FieldMapperProviderTest {
         return Stream.of(Long.class, long.class);
     }
 
+    private static Stream<Class<?>> bigIntegerClassesProvider() {
+        return Stream.of(BigInteger.class, Number.class, Comparable.class);
+    }
+
     private static Stream<Class<?>> allStringClassesProvider() {
         return Stream.of(String.class, Serializable.class, Comparable.class, CharSequence.class, Object.class);
     }
@@ -49,6 +54,7 @@ class FieldMapperProviderTest {
                 shortClassesProvider(),
                 integerClassesProvider(),
                 longClassesProvider(),
+                bigIntegerClassesProvider(),
                 Stream.of(String.class, byte[].class, Byte[].class)
         ).flatMap(i -> i);
     }
@@ -73,6 +79,22 @@ class FieldMapperProviderTest {
         final String testString = "ThisIsTest String!@#$";
         final ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes());
         assertMappingWorks(buffer, stringClass, true, 0, testString.length(), testString);
+    }
+
+
+    @Test
+    void assertMappingShouldReturnStringForObject() throws Exception {
+        final String testString = "ThisIsTest String!@#$";
+        final ByteBuffer buffer = ByteBuffer.wrap(testString.getBytes());
+        assertMappingWorks(buffer, Object.class, true, 0, testString.length(), testString);
+    }
+
+    @Test
+    void assertMappingShouldReturnBigIntegerForNumber() throws Exception {
+        final long testValue = 123456l;
+        final ByteBuffer buffer = (ByteBuffer) ByteBuffer.allocate(Long.BYTES).putLong(testValue).flip();
+        final BigInteger expected = BigInteger.valueOf(testValue);
+        assertMappingWorks(buffer, Number.class, true, 0, Long.BYTES, expected);
     }
 
     @MethodSource("allTypesProvider")
@@ -148,7 +170,7 @@ class FieldMapperProviderTest {
 
     @MethodSource("booleanClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForLEBoolean(Class<?> booleanClass) throws Exception {
+    void assertMappingWorkingForLEBoolean(Class<?> clazz) throws Exception {
         final int typeSize = Byte.BYTES;
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
                 .allocate(typeSize * 4)
@@ -158,15 +180,15 @@ class FieldMapperProviderTest {
                 .put((byte) 0xFF)
                 .flip();
 
-        assertMappingWorks(buffer, booleanClass, false, 0, typeSize, false);
-        assertMappingWorks(buffer, booleanClass, false, typeSize, typeSize, true);
-        assertMappingWorks(buffer, booleanClass, false, 2 * typeSize, typeSize, true);
-        assertMappingWorks(buffer, booleanClass, false, 3 * typeSize, typeSize, true);
+        assertMappingWorks(buffer, clazz, false, 0, typeSize, false);
+        assertMappingWorks(buffer, clazz, false, typeSize, typeSize, true);
+        assertMappingWorks(buffer, clazz, false, 2 * typeSize, typeSize, true);
+        assertMappingWorks(buffer, clazz, false, 3 * typeSize, typeSize, true);
     }
 
     @MethodSource("booleanClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForBEBoolean(Class<?> booleanClass) throws Exception {
+    void assertMappingWorkingForBEBoolean(Class<?> clazz) throws Exception {
         final int typeSize = Byte.BYTES;
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
                 .allocate(typeSize * 4)
@@ -176,15 +198,15 @@ class FieldMapperProviderTest {
                 .put((byte) 0xFF)
                 .flip();
 
-        assertMappingWorks(buffer, booleanClass, true, 0, typeSize, false);
-        assertMappingWorks(buffer, booleanClass, true, typeSize, typeSize, true);
-        assertMappingWorks(buffer, booleanClass, true, 2 * typeSize, typeSize, true);
-        assertMappingWorks(buffer, booleanClass, true, 3 * typeSize, typeSize, true);
+        assertMappingWorks(buffer, clazz, true, 0, typeSize, false);
+        assertMappingWorks(buffer, clazz, true, typeSize, typeSize, true);
+        assertMappingWorks(buffer, clazz, true, 2 * typeSize, typeSize, true);
+        assertMappingWorks(buffer, clazz, true, 3 * typeSize, typeSize, true);
     }
 
     @MethodSource("byteClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForLEByte(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForLEByte(Class<?> clazz) throws Exception {
         final int typeSize = Byte.BYTES;
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
                 .allocate(typeSize * 4)
@@ -194,49 +216,35 @@ class FieldMapperProviderTest {
                 .put((byte) 0xFF)
                 .flip();
 
-        assertMappingWorks(buffer, byteClass, false, 0, typeSize, (byte) 0);
-        assertMappingWorks(buffer, byteClass, false, typeSize, typeSize, (byte) 1);
-        assertMappingWorks(buffer, byteClass, false, 2 * typeSize, typeSize, Byte.MAX_VALUE);
-        assertMappingWorks(buffer, byteClass, false, 3 * typeSize, typeSize, (byte) 0xFF);
+        assertMappingWorks(buffer, clazz, false, 0, typeSize, (byte) 0);
+        assertMappingWorks(buffer, clazz, false, typeSize, typeSize, (byte) 1);
+        assertMappingWorks(buffer, clazz, false, 2 * typeSize, typeSize, Byte.MAX_VALUE);
+        assertMappingWorks(buffer, clazz, false, 3 * typeSize, typeSize, (byte) 0xFF);
     }
 
     @MethodSource("byteClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForBEByte(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForBEByte(Class<?> clazz) throws Exception {
         final int typeSize = Byte.BYTES;
-        final ByteBuffer buffer = (ByteBuffer) ByteBuffer
-                .allocate(typeSize * 4)
-                .put((byte) 0)
-                .put((byte) 1)
-                .put(Byte.MAX_VALUE)
-                .put((byte) 0xFF)
-                .flip();
-
-        assertMappingWorks(buffer, byteClass, true, 0, typeSize, (byte) 0);
-        assertMappingWorks(buffer, byteClass, true, typeSize, typeSize, (byte) 1);
-        assertMappingWorks(buffer, byteClass, true, 2 * typeSize, typeSize, Byte.MAX_VALUE);
-        assertMappingWorks(buffer, byteClass, true, 3 * typeSize, typeSize, (byte) 0xFF);
+        for(short i=Byte.MIN_VALUE; i<=Byte.MAX_VALUE; i++){
+            final ByteBuffer buffer = (ByteBuffer) ByteBuffer.allocate(typeSize).put((byte)i).flip();
+            assertMappingWorks(buffer, clazz, true, 0, typeSize, (byte)i);
+        }
     }
 
     @MethodSource("shortClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForBEShort(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForBEShort(Class<?> clazz) throws Exception {
         final int typeSize = Short.BYTES;
-        final ByteBuffer buffer = (ByteBuffer) ByteBuffer
-                .allocate(typeSize * 3)
-                .putShort((short) 0)
-                .putShort((short) 1)
-                .putShort(Short.MAX_VALUE)
-                .flip();
-
-        assertMappingWorks(buffer, byteClass, true, 0, typeSize, (short) 0);
-        assertMappingWorks(buffer, byteClass, true, typeSize, typeSize, (short) 1);
-        assertMappingWorks(buffer, byteClass, true, 2 * typeSize, typeSize, Short.MAX_VALUE);
+        for(short i=Short.MAX_VALUE; i>=0; i--){
+            final ByteBuffer buffer = (ByteBuffer) ByteBuffer.allocate(typeSize).putShort(i).flip();
+            assertMappingWorks(buffer, clazz, true, 0, typeSize, i);
+        }
     }
 
     @MethodSource("shortClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForLEShort(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForLEShort(Class<?> clazz) throws Exception {
         final int typeSize = Short.BYTES;
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
                 .allocate(typeSize * 3)
@@ -245,30 +253,24 @@ class FieldMapperProviderTest {
                 .putShort((short) 0xFF00)
                 .flip();
 
-        assertMappingWorks(buffer, byteClass, false, 0, typeSize, (short) 0);
-        assertMappingWorks(buffer, byteClass, false, typeSize, typeSize, (short) 0x0001);
-        assertMappingWorks(buffer, byteClass, false, 2 * typeSize, typeSize, (short) 0x00FF);
+        assertMappingWorks(buffer, clazz, false, 0, typeSize, (short) 0);
+        assertMappingWorks(buffer, clazz, false, typeSize, typeSize, (short) 0x0001);
+        assertMappingWorks(buffer, clazz, false, 2 * typeSize, typeSize, (short) 0x00FF);
     }
 
     @MethodSource("integerClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForBEInteger(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForBEInteger(Class<?> clazz) throws Exception {
         final int typeSize = Integer.BYTES;
-        final ByteBuffer buffer = (ByteBuffer) ByteBuffer
-                .allocate(typeSize * 3)
-                .putInt(0)
-                .putInt(1)
-                .putInt(Integer.MAX_VALUE)
-                .flip();
-
-        assertMappingWorks(buffer, byteClass, true, 0, typeSize, 0);
-        assertMappingWorks(buffer, byteClass, true, typeSize, typeSize, 1);
-        assertMappingWorks(buffer, byteClass, true, 2 * typeSize, typeSize, Integer.MAX_VALUE);
+        for(int i=Integer.MAX_VALUE; i>=0; i=-3){
+            final ByteBuffer buffer = (ByteBuffer) ByteBuffer.allocate(typeSize).putInt(i).flip();
+            assertMappingWorks(buffer, clazz, true, 0, typeSize, i);
+        }
     }
 
     @MethodSource("integerClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForLEInteger(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForLEInteger(Class<?> clazz) throws Exception {
         final int typeSize = Integer.BYTES;
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
                 .allocate(typeSize * 3)
@@ -277,30 +279,24 @@ class FieldMapperProviderTest {
                 .putInt(0xFFFF0000)
                 .flip();
 
-        assertMappingWorks(buffer, byteClass, false, 0, typeSize, 0);
-        assertMappingWorks(buffer, byteClass, false, typeSize, typeSize, 1);
-        assertMappingWorks(buffer, byteClass, false, 2 * typeSize, typeSize, 0x0000FFFF);
+        assertMappingWorks(buffer, clazz, false, 0, typeSize, 0);
+        assertMappingWorks(buffer, clazz, false, typeSize, typeSize, 1);
+        assertMappingWorks(buffer, clazz, false, 2 * typeSize, typeSize, 0x0000FFFF);
     }
 
     @MethodSource("longClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForBELong(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForBELong(Class<?> clazz) throws Exception {
         final int typeSize = Long.BYTES;
-        final ByteBuffer buffer = (ByteBuffer) ByteBuffer
-                .allocate(typeSize * 3)
-                .putLong(0)
-                .putLong(1)
-                .putLong(Long.MAX_VALUE)
-                .flip();
-
-        assertMappingWorks(buffer, byteClass, true, 0, typeSize, 0L);
-        assertMappingWorks(buffer, byteClass, true, typeSize, typeSize, 1L);
-        assertMappingWorks(buffer, byteClass, true, 2 * typeSize, typeSize, Long.MAX_VALUE);
+        for(long i=Long.MAX_VALUE; i>=0; i-=(i==Long.MAX_VALUE) ? 1 : (Long.MAX_VALUE - i)){
+            final ByteBuffer buffer = (ByteBuffer) ByteBuffer.allocate(typeSize).putLong(i).flip();
+            assertMappingWorks(buffer, clazz, true, 0, typeSize, i);
+        }
     }
 
     @MethodSource("longClassesProvider")
     @ParameterizedTest
-    void assertMappingWorkingForLELong(Class<?> byteClass) throws Exception {
+    void assertMappingWorkingForLELong(Class<?> clazz) throws Exception {
         final int typeSize = Long.BYTES;
         final ByteBuffer buffer = (ByteBuffer) ByteBuffer
                 .allocate(typeSize * 3)
@@ -309,9 +305,9 @@ class FieldMapperProviderTest {
                 .putLong(0xFFFFFFFF00000000L)
                 .flip();
 
-        assertMappingWorks(buffer, byteClass, false, 0, typeSize, 0L);
-        assertMappingWorks(buffer, byteClass, false, typeSize, typeSize, 1L);
-        assertMappingWorks(buffer, byteClass, false, 2 * typeSize, typeSize, 0x00000000FFFFFFFFL);
+        assertMappingWorks(buffer, clazz, false, 0, typeSize, 0L);
+        assertMappingWorks(buffer, clazz, false, typeSize, typeSize, 1L);
+        assertMappingWorks(buffer, clazz, false, 2 * typeSize, typeSize, 0x00000000FFFFFFFFL);
     }
 
     @Test
