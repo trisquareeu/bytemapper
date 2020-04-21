@@ -10,10 +10,10 @@ It handles object instantiation and mapping values from bytes into annotated fie
 # Get ready
 Add following dependency to your projects POM:
 ```xml
-<dependency>
+<dependency>git 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
-    <version>0.1-ALPHA</version>
+    <version>1.0-RC1</version>
 </dependency> 
 ```
 For other build tools, please refer [here](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper). 
