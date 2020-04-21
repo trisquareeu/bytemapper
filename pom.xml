@@ -6,7 +6,7 @@
 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>bytemapper</name>
     <description>
@@ -199,7 +199,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
 
     <distributionManagement>

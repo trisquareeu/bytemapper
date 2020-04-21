@@ -45,4 +45,5 @@ public @interface Value {
      * @return true if value is big-endian
      */
     boolean bigEndian() default true;
+
 }
