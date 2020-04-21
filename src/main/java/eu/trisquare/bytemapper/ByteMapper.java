@@ -3,8 +3,8 @@ package eu.trisquare.bytemapper;
 import eu.trisquare.bytemapper.annotations.Value;
 import eu.trisquare.bytemapper.fieldmapper.FieldMapper;
 import eu.trisquare.bytemapper.fieldmapper.FieldMapperProvider;
-import eu.trisquare.bytemapper.fieldmapper.UnsupportedTypeException;
 import eu.trisquare.bytemapper.fieldmapper.TooSmallDatatypeException;
+import eu.trisquare.bytemapper.fieldmapper.UnsupportedTypeException;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -14,12 +14,13 @@ import static eu.trisquare.bytemapper.ReflectionHelper.*;
 
 /**
  * Handles deserialization of raw byte data into Plain Old Java Objects (POJO).
- * It handles object instantiation and mapping values from bytes into annotated fields. Currently, only unsigned
- * values are supported.
+ * It handles object instantiation and mapping values from bytes into annotated fields.
  */
 public class ByteMapper {
 
-    /** Mapper provider instance */
+    /**
+     * Mapper provider instance
+     */
     private static final FieldMapperProvider mapperProvider = new FieldMapperProvider();
 
     /**
@@ -41,9 +42,9 @@ public class ByteMapper {
      * @throws IllegalFieldModifierException when fields is either static or final
      * @throws EmptyBufferException          when provided buffer is empty
      * @throws NegativeIndexException        when start byte index is negative
-     * @throws InvalidSizeException         when size is lower than 1 byte
+     * @throws InvalidSizeException          when size is lower than 1 byte
      * @throws DataExceedsBufferException    when last byte index exceeds buffer limit
-     * @throws UnsupportedTypeException        when unable to determine eligible mapper for given field type
+     * @throws UnsupportedTypeException      when unable to determine eligible mapper for given field type
      * @throws TooSmallDatatypeException     when field data type cannot fit requested size
      * @throws ArithmeticException           if the value of mapped value will not exactly fit in a datatype due to
      *                                       signedness conversion.
@@ -74,9 +75,9 @@ public class ByteMapper {
      * @throws RuntimeException                    when mapper failed to write value into field or when class cannot be instantiated
      * @throws EmptyBufferException                when provided buffer is empty
      * @throws NegativeIndexException              when start byte index is negative
-     * @throws InvalidSizeException               when size is lower than 1 byte
+     * @throws InvalidSizeException                when size is lower than 1 byte
      * @throws DataExceedsBufferException          when last byte index exceeds buffer limit
-     * @throws UnsupportedTypeException              when unable to determine eligible mapper for given field type
+     * @throws UnsupportedTypeException            when unable to determine eligible mapper for given field type
      * @throws TooSmallDatatypeException           when field data type cannot fit requested size
      * @throws ArithmeticException                 if the value of mapped value will not exactly fit in a datatype due to
      *                                             signedness conversion.
@@ -93,10 +94,10 @@ public class ByteMapper {
      * @throws IllegalFieldModifierException when fields is either static or final
      * @throws EmptyBufferException          when provided buffer is empty
      * @throws NegativeIndexException        when start byte index is negative
-     * @throws InvalidSizeException         when size is lower than 1 byte
+     * @throws InvalidSizeException          when size is lower than 1 byte
      * @throws DataExceedsBufferException    when last byte index exceeds buffer limit
      * @throws RuntimeException              when mapper failed to write value into field.
-     * @throws UnsupportedTypeException        when unable to determine eligible mapper for given field type
+     * @throws UnsupportedTypeException      when unable to determine eligible mapper for given field type
      * @throws TooSmallDatatypeException     when field data type cannot fit requested size
      * @throws ArithmeticException           if the value of mapped value will not exactly fit in a datatype due to
      *                                       signedness conversion.
@@ -154,7 +155,7 @@ public class ByteMapper {
      * Checks if size is bigger than zero and if last byte index does
      * not exceed buffer limit.
      *
-     * @throws InvalidSizeException      when size is lower than 1 byte
+     * @throws InvalidSizeException       when size is lower than 1 byte
      * @throws DataExceedsBufferException when last byte index is bigger than buffer limit
      */
     private static void checkSize(int startByte, int size, int bufferLimit) {

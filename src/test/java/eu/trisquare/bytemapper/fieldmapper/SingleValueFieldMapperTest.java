@@ -467,9 +467,9 @@ class SingleValueFieldMapperTest {
     }
 
     @Test
-    void signedByteValueShouldBeUnsignedForBiggerTypes(){
+    void signedByteValueShouldBeUnsignedForBiggerTypes() {
         final ByteBuffer buffer = ByteBuffer.allocate(1);
-        buffer.put((byte)0xFF);
+        buffer.put((byte) 0xFF);
         buffer.flip();
 
         final FieldMapper byteMapper = mapperProvider.getMapper(byte.class);
@@ -491,9 +491,9 @@ class SingleValueFieldMapperTest {
 
 
     @Test
-    void signedBigIntegerCanBeConvertedToUnsigned(){
+    void signedBigIntegerCanBeConvertedToUnsigned() {
         final ByteBuffer buffer = ByteBuffer.allocate(1);
-        buffer.put((byte)0xFF);
+        buffer.put((byte) 0xFF);
         buffer.flip();
 
         final FieldMapper bigIntegerMapper = mapperProvider.getMapper(BigInteger.class);

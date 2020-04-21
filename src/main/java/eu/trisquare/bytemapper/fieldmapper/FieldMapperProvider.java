@@ -16,6 +16,9 @@ public class FieldMapperProvider {
      */
     private static final List<FieldMapper> mappers;
 
+    /**
+     * Maps ByteBuffer to particular type
+     */
     private static final TypeMapper typeMapper = new StandardTypeMapper();
 
     static {

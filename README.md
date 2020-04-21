@@ -103,8 +103,8 @@ In similar way you can apply this rule to String and array types, resulting in r
 
 ## Quick note on signedness
 Java supports only signed integer types. This is effectively limiting by half maximum value that could be stored in these,
-when compared to unsigned types. Java's considering negative number when the most significant bit (MSB) is set (1). <br/>
-This is giving you choice if you want to interpret incoming value as signed or not. When length of provided data input will 
+when compared to unsigned types. Java considers negative number when the most significant bit (MSB) is set to 1. <br/>
+You still can choose if you want to treat your input as a signed or unsigned value, thought. When length of provided data input will 
 exactly match chosen type size (i.e. four bytes for type of int), value will be considered signed (first, most significant 
 bit will directly depend on inputs content). You can however use bigger type than incoming data (i.e. type of long for the same, 
 four-bytes value) that will eventually make its most-significant bit nonassignable by input data, resulting in always-positive

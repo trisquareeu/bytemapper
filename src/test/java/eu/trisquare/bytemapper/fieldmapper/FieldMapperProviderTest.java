@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FieldMapperProviderTest {
 
+    private final FieldMapperProvider mapperProvider = new FieldMapperProvider();
+
     private static Stream<Class<?>> classesProvider() {
         return Stream.of(
                 String.class,
@@ -25,11 +27,8 @@ class FieldMapperProviderTest {
         );
     }
 
-    private final FieldMapperProvider mapperProvider = new FieldMapperProvider();
-
-
     @Test
-    void getMapperShouldThrowForUnsupportedType(){
+    void getMapperShouldThrowForUnsupportedType() {
         Exception e = assertThrows(
                 UnsupportedTypeException.class,
                 () -> mapperProvider.getMapper(Class.class)
@@ -45,14 +44,14 @@ class FieldMapperProviderTest {
 
 
     @Test
-    void getMapperShouldReturnStringMapperForObject(){
+    void getMapperShouldReturnStringMapperForObject() {
         final FieldMapper mapper = mapperProvider.getMapper(Object.class);
         assertNotNull(mapper);
         assertTrue(mapper.isEligible(String.class));
     }
 
     @Test
-    void getMapperShouldReturnBigIntegerMapperForNumber(){
+    void getMapperShouldReturnBigIntegerMapperForNumber() {
         final FieldMapper mapper = mapperProvider.getMapper(Number.class);
         assertNotNull(mapper);
         assertTrue(mapper.isEligible(BigInteger.class));

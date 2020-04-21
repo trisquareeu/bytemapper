@@ -8,15 +8,19 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Helper class for ByteBuffer to specific Object coversion
+ * Helper class for ByteBuffer to specific Object conversion
  */
 class StandardTypeMapper implements TypeMapper {
-
+    /**
+     * Creates StandardTypeMapper instance
+     */
     StandardTypeMapper() {
         //empty
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean toBoolean(
             ByteBuffer buffer,
@@ -31,7 +35,9 @@ class StandardTypeMapper implements TypeMapper {
         return outcome;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte toByte(
             ByteBuffer buffer,
@@ -42,40 +48,115 @@ class StandardTypeMapper implements TypeMapper {
         return getSlice(Byte.BYTES, buffer, isBigEndian, startByte, size).get();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public short toShort(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         return getSlice(Short.BYTES, buffer, isBigEndian, startByte, size).getShort();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int toInt(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         return getSlice(Integer.BYTES, buffer, isBigEndian, startByte, size).getInt();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long toLong(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         return getSlice(Long.BYTES, buffer, isBigEndian, startByte, size).getLong();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double toDouble(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         return getSlice(Double.BYTES, buffer, isBigEndian, startByte, size).getDouble();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public float toFloat(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         return getSlice(Float.BYTES, buffer, isBigEndian, startByte, size).getFloat();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BigInteger toBigInteger(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         final byte[] bytes = readBytes(buffer, isBigEndian, startByte, size);
         return new BigInteger(bytes);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
+        final byte[] bytes = readBytes(buffer, isBigEndian, startByte, size);
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] toByteArray(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
+        return readBytes(buffer, isBigEndian, startByte, size);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Byte[] toByteObjectArray(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
+        final byte[] bytes = readBytes(buffer, isBigEndian, startByte, size);
+        return ArrayUtils.toObject(bytes);
+    }
+
+    /**
+     * Gets {@code size} bytes from {@code source}, starting from {@code startByte} and ending on
+     * {@code startByte+size} as a primitive bytes array. If {@code isBigEndian} flag is set to
+     * {@code false}, returned array will have opposite order than in source.
+     *
+     * @param source      to obtain data from
+     * @param isBigEndian determines data traversal direction
+     * @param startByte   position (0-inclusive index) of first byte to copy
+     * @param size        number of bytes to copy
+     * @return {@code size} bytes copied form {@code source} as a primitive bytes array in direct or opposite direction
+     */
+    private byte[] readBytes(ByteBuffer source, boolean isBigEndian, int startByte, int size) {
+        final byte[] bytes = new byte[size];
+        for (int n = 0; n < size; n++) {
+            final int byteIdx = isBigEndian ? n : (size - n - 1);
+            bytes[n] = source.get(startByte + byteIdx);
+        }
+        return bytes;
+    }
+
+
+    /**
+     * Returns ByteBuffer with content length equal to {@code expectedSize}, containing {@code size} bytes slice
+     * of input ByteBuffer source, starting from {@code startByte} and ending on {@code startByte+size}.
+     * If {@code expectedSize} is bigger than {@code size}, zeroes will be used as a padding on MSB side.
+     *
+     * @param expectedSize expected size of slice, including optional padding
+     * @param source       to copy data from
+     * @param isBigEndian  determines data traversal direction
+     * @param startByte    position (0-inclusive index) of first byte to copy
+     * @param size         number of bytes to copy
+     * @return slice of {@code expectedSize} bytes, containing {@code size} bytes copied form {@code source}
+     */
     private ByteBuffer getSlice(int expectedSize, ByteBuffer source, boolean isBigEndian, int startByte, int size) {
         final ByteOrder order = isBigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
         final ByteBuffer slice = ByteBuffer.allocate(expectedSize);
@@ -86,37 +167,6 @@ class StandardTypeMapper implements TypeMapper {
         }
         slice.flip();
         return slice;
-    }
-
-    @Override
-    public String toString(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
-        final byte[] bytes = readBytes(buffer, isBigEndian, startByte, size);
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
-
-    @Override
-    public byte[] toByteArray(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
-        return readBytes(buffer, isBigEndian, startByte, size);
-    }
-
-
-    @Override
-    public Byte[] toByteObjectArray(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
-        final byte[] bytes = readBytes(buffer, isBigEndian, startByte, size);
-        return ArrayUtils.toObject(bytes);
-    }
-
-    /**
-     * Obtains primitive byte array from given ByteBuffer
-     */
-    private byte[] readBytes(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
-        final byte[] bytes = new byte[size];
-        for (int n = 0; n < size; n++) {
-            final int byteIdx = isBigEndian ? n : (size - n - 1);
-            bytes[n] = buffer.get(startByte + byteIdx);
-        }
-        return bytes;
     }
 
 }

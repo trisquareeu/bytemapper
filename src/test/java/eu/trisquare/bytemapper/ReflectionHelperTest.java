@@ -16,67 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ReflectionHelperTest {
 
-    @SuppressWarnings({"FieldMayBeFinal", "unused"})
-    private static class TestClass {
-
-        @Value(startByte = 0)
-        public int publicInt = 123;
-        protected int protectedInt = 123;
-        int defaultInt = 123;
-        private int privateInt = 123;
-
-        @Value(startByte = 1)
-        public final int publicFinalInt = 123;
-        protected final int protectedFinalInt = 123;
-        final int defaultFinalInt = 123;
-        private final int privateFinalInt = 123;
-
-        @Value(startByte = 2)
-        public static int publicStaticInt = 123;
-        protected static int protectedStaticInt = 123;
-        static int defaultStaticInt = 123;
-        private static int privateStaticInt = 123;
-
-        @Value(startByte = 3)
-        public static final int publicStaticFinalInt = 123;
-        protected static final int protectedStaticFinalInt = 123;
-        static final int defaultStaticFinalInt = 123;
-        private static final int privateStaticFinalInt = 123;
-
-
-        public TestClass() {
-            //empty
-        }
-    }
-
-    private static class NoPublicConstructor {
-        private NoPublicConstructor() {
-            //empty
-        }
-    }
-
-    private class NonStaticInnerClass {
-        public NonStaticInnerClass() {
-            //empty
-        }
-    }
-
-    private abstract class AbstractClass {
-        public AbstractClass() {
-            //empty
-        }
-    }
-
-    private interface InterfaceClass {
-
-    }
-
-    private static class InvocationExceptionClass {
-        public InvocationExceptionClass() {
-            throw new RuntimeException();
-        }
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {
             "publicInt", "protectedInt", "defaultInt", "privateInt"
@@ -92,7 +31,6 @@ class ReflectionHelperTest {
             f.setAccessible(false);
         }
     }
-
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -126,7 +64,6 @@ class ReflectionHelperTest {
         );
         assertEquals("Unable to set value for field " + fieldName + ".", e.getMessage());
     }
-
 
     @Test
     void getAnnotatedFieldsShouldReturnAllFields() {
@@ -212,5 +149,63 @@ class ReflectionHelperTest {
                 e.getMessage()
         );
 
+    }
+
+    private interface InterfaceClass {
+
+    }
+
+    @SuppressWarnings({"FieldMayBeFinal", "unused"})
+    private static class TestClass {
+
+        @Value(startByte = 3)
+        public static final int publicStaticFinalInt = 123;
+        protected static final int protectedStaticFinalInt = 123;
+        static final int defaultStaticFinalInt = 123;
+        private static final int privateStaticFinalInt = 123;
+        @Value(startByte = 2)
+        public static int publicStaticInt = 123;
+        protected static int protectedStaticInt = 123;
+        static int defaultStaticInt = 123;
+        private static int privateStaticInt = 123;
+        @Value(startByte = 1)
+        public final int publicFinalInt = 123;
+        protected final int protectedFinalInt = 123;
+        final int defaultFinalInt = 123;
+        private final int privateFinalInt = 123;
+        @Value(startByte = 0)
+        public int publicInt = 123;
+        protected int protectedInt = 123;
+        int defaultInt = 123;
+        private int privateInt = 123;
+
+
+        public TestClass() {
+            //empty
+        }
+    }
+
+    private static class NoPublicConstructor {
+        private NoPublicConstructor() {
+            //empty
+        }
+    }
+
+    private static class InvocationExceptionClass {
+        public InvocationExceptionClass() {
+            throw new RuntimeException();
+        }
+    }
+
+    private class NonStaticInnerClass {
+        public NonStaticInnerClass() {
+            //empty
+        }
+    }
+
+    private abstract class AbstractClass {
+        public AbstractClass() {
+            //empty
+        }
     }
 }
