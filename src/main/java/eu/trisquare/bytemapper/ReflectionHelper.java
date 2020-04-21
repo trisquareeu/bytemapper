@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 /**
  * Provides methods wrapping standard reflection calls
  */
-public class ReflectionHelper {
+class ReflectionHelper {
 
     /**
      * This class is not required to be instantiated, because API is provided as static methods

@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 /**
  * Default mapper for all single-value data types, i.e. numbers
  */
-public class SingleValueFieldMapper implements FieldMapper {
+class SingleValueFieldMapper implements FieldMapper {
 
     /**
      * Holds maximum allowed size of processed data type, i.e. 8 bytes for long
