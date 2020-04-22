@@ -2,15 +2,15 @@
 ByteMapper is a java library helping with deserialization of raw byte data into Plain Old Java Objects (POJO).
 It handles object instantiation and mapping values from bytes into annotated fields. 
 
-[![Build Status](https://img.shields.io/travis/com/trisquareeu/bytemapper)](https://github.com/trisquareeu/bytemapper/)
-[![Coverage Status](https://img.shields.io/coveralls/github/trisquareeu/bytemapper)](https://coveralls.io/github/trisquareeu/bytemapper?branch=master)
+[![Build Status](https://travis-ci.com/trisquareeu/bytemapper.svg?branch=master)](https://travis-ci.com/trisquareeu/bytemapper)
+[![Coverage Status](https://coveralls.io/repos/github/trisquareeu/bytemapper/badge.svg?branch=master)](https://coveralls.io/github/trisquareeu/bytemapper?branch=master)
 [![javadoc](https://javadoc.io/badge2/eu.trisquare/bytemapper/javadoc.svg)](https://javadoc.io/doc/eu.trisquare/bytemapper)
-[![Maven Central](https://img.shields.io/maven-central/v/eu.trisquare/bytemapper)](https://search.maven.org/search?q=g:%22eu.trisquare%22%20AND%20a:%22bytemapper%22)
+[![Maven Central](https://img.shields.io/maven-central/v/eu.trisquare/bytemapper.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.trisquare%22%20AND%20a:%22bytemapper%22)
 
 # Get ready
 Add following dependency to your projects POM:
 ```xml
-<dependency>git 
+<dependency> 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
     <version>1.0-RC1</version>
