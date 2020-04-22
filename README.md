@@ -85,15 +85,15 @@ Currently, supported types (and it's wrappers) are:
 * **boolean** which is logical false if all selected bytes are zeroes, otherwise is true.
 
 Mapper will check if annotated field is assignable by one of above types and then perform conversions from bytes to that
-particular type. If given field is assignable by more than one of listed types first one will be used. 
+particular type. If given field is assignable by more than one of listed types, first one will be used. 
 
-Good example is Object type that can be assigned by virtually any from above list, but String instance will used. 
-On the other hand type Number, which is unassignable by String will be assigned with instance of BigInteger instead.
+Good example is Object type that can be assigned by virtually any from above list, but String instance will be used. 
+On the other hand type Number, which is nonassignable by String will be assigned with instance of BigInteger instead.
 
 If field is not assignable by any of above types, UnsupportedTypeException will be thrown.
 
 ## Endianness
-ByteMapper supports both Big- and Little-Endian byte order, although bigEndian is used by default. You can change this,
+ByteMapper supports both big- and little-endian byte order, although big-endian is used by default. You can change this,
 by setting relevant property of Value annotation: `@Value(startByte = 0, bigEndian=false)`. Results will be as follows:
 * 0x0F mapped as little-endian byte will result in 0x0F(=15 decimal) value.
 * 0x000F mapped as little-endian short will result in 0x0F00(=3840 decimal) value.
@@ -102,31 +102,31 @@ by setting relevant property of Value annotation: `@Value(startByte = 0, bigEndi
 In similar way you can apply this rule to String and array types, resulting in reversed byte order.
 
 ## Quick note on signedness
-Java supports only signed integer types. This is effectively limiting by half maximum value that could be stored in these,
-when compared to unsigned types. Java considers negative number when the most significant bit (MSB) is set to 1. <br/>
-You still can choose if you want to treat your input as a signed or unsigned value, thought. When length of provided data input will 
-exactly match chosen type size (i.e. four bytes for type of int), value will be considered signed (first, most significant 
-bit will directly depend on inputs content). You can however use bigger type than incoming data (i.e. type of long for the same, 
-four-bytes value) that will eventually make its most-significant bit nonassignable by input data, resulting in always-positive
+Java supports only signed integer types. Maximum value is effectively limited by half, 
+when compared to unsigned types. Java considers a negative number when the most significant bit (MSB) is set to 1. <br/>
+You still can choose if you want to treat your input as a signed or unsigned value, though. When the length of provided data input will 
+exactly match the chosen type size (i.e. four bytes for the type of int), value will be considered signed (first, most significant 
+bit will directly depend on input content). You can however use bigger type than incoming data (i.e. type of long for the same, 
+four-byte value) that will eventually make its most-significant bit unreachable by any bits of input data, resulting in always-positive
 (unsigned) value.
 
 **Example**:<br>
 * Your data contains byte 0xFF. It's equal to -1 in two's complement signed representation and 255 when considered unsigned.
-You can choose to get signed value, by mapping it as a Java's byte, which size will exactly match inputs size. MSB will be set
-to 1, resulting in negative value. On the other hand, you can use short or any bigger data type to map this byte. In this situation,
+You can choose to get signed value, by mapping it as a Java's byte, which size will exactly match input size. MSB will be set
+to 1, resulting in negative values. On the other hand, you can use short or any bigger data type to map this byte. In this situation,
 most significant byte of Java's type will be always 0x00, resulting in positive value, which is equal to 255.
 * Your data contains short 0xFFFF. Similar to previous, it may be -1 when using two's complement signed value representation
-or 65535. If you map it as a short, you'll get signed (-1) value. If you use bigger data type, it will be stored as a unsigned
+or 65535. If you map it as a short, you'll get signed (-1) value. If you use bigger data type, it will be stored as an unsigned
 65535 value.
 * Everything above applies to Java's integer data types for which bigger type is present. If you want to map unsigned long value
 into Java's object, you have to use BigInteger. You'll get signed value, however. It may be converted to unsigned one by calling
-`BigInteger unsignedBigInteger = new BigInteger(1, signedBigInteger.toByteArray())`. You can find example for this in test scenarios.
+`BigInteger unsignedBigInteger = new BigInteger(1, signedBigInteger.toByteArray())`. You can find an example for this in test scenarios.
 
 # Licence 
-This project is under permissive, MIT licence. Please refer to LICENSE file for more details.
+This project is under permissive, MIT license. Please refer to LICENSE file for more details.
 
 # Contribute!
-Any support to this project will be warmly welcomed. You can contribute either by issuing bug report, 
+Any support for this project will be warmly welcomed. You can contribute either by issuing bug report, 
 feature request or by the most appreciated way, creating a pull request. 
 
 This project is in its early stage of development, currently maintained by only one person as a helper 
