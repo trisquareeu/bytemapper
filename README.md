@@ -106,7 +106,7 @@ Java supports only signed integer types. Maximum value is effectively limited by
 when compared to unsigned types. Java considers a negative number when the most significant bit (MSB) is set to 1. <br/>
 You still can choose if you want to treat your input as a signed or unsigned value, though. When the length of provided data input will 
 exactly match the chosen type size (i.e. four bytes for the type of int), value will be considered signed (first, most significant 
-bit will directly depend on input content). You can however use bigger type than incoming data (i.e. type of long for the same, 
+bit will directly depend on input content). You can however use bigger type than incoming data (i.e. the type of long which uses eight bytes for the same, 
 four-byte value) that will eventually make its most-significant bit unreachable by any bits of input data, resulting in always-positive
 (unsigned) value.
 
