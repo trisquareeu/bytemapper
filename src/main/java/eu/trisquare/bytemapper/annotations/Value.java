@@ -6,13 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 /**
  * Fields decorated with this annotation will be processed by {@link eu.trisquare.bytemapper.ByteMapper}
  * Annotated fields must not be final nor static.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({FIELD})
+@Target({FIELD, PARAMETER})
 public @interface Value {
 
     /**

@@ -9,8 +9,7 @@ import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("unused")
-class ByteMapperTest {
+class ByteMapperAnnotatedFieldsTest {
 
     private static final String TEST_STRING_VALUE = "1234";
 
@@ -159,9 +158,10 @@ class ByteMapperTest {
         assertEquals(Float.MAX_VALUE, object.floatValue);
     }
 
+    @SuppressWarnings("unused")
     private static class TestClasses {
         private static abstract class AbstractClass {
-            public AbstractClass() {
+            private AbstractClass() {
                 //empty
             }
         }
@@ -176,7 +176,7 @@ class ByteMapperTest {
             @Value(startByte = -1)
             private boolean booleanValue;
 
-            public NegativeIndexClass() {
+            private NegativeIndexClass() {
                 //empty
             }
         }
@@ -185,7 +185,7 @@ class ByteMapperTest {
             @Value(startByte = 0, size = -1)
             private boolean booleanValue;
 
-            public NegativeSizeClass() {
+            private NegativeSizeClass() {
                 //empty
             }
         }
@@ -194,7 +194,7 @@ class ByteMapperTest {
             @Value(startByte = 0, size = 8)
             private boolean booleanValue;
 
-            public SizeExceedsBuffer() {
+            private SizeExceedsBuffer() {
                 //empty
             }
         }
@@ -203,7 +203,7 @@ class ByteMapperTest {
             @Value(startByte = 0)
             private final boolean booleanValue = false;
 
-            public FinalField() {
+            private FinalField() {
                 //empty
             }
         }
@@ -212,7 +212,7 @@ class ByteMapperTest {
             @Value(startByte = 0)
             private static boolean booleanValue;
 
-            public StaticField() {
+            private StaticField() {
                 //empty
             }
         }
@@ -221,7 +221,7 @@ class ByteMapperTest {
             @Value(startByte = 0, size = 4)
             private Object object;
 
-            public UnknownTypeClass() {
+            private UnknownTypeClass() {
                 //empty
             }
         }
@@ -230,7 +230,7 @@ class ByteMapperTest {
             @Value(startByte = 0)
             private Void object;
 
-            public UnsupportedType() {
+            private UnsupportedType() {
                 //empty
             }
         }
@@ -240,7 +240,7 @@ class ByteMapperTest {
             @Value(startByte = 0)
             private boolean booleanValue;
 
-            public UnsupportedConversion() {
+            private UnsupportedConversion() {
                 //empty
             }
 
@@ -275,7 +275,7 @@ class ByteMapperTest {
             @Value(startByte = 36, size = 4)
             private float floatValue;
 
-            public ValidMappingClass() {
+            private ValidMappingClass() {
                 //empty
             }
         }

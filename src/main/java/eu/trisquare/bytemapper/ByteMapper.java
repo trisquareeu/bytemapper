@@ -7,8 +7,11 @@ import eu.trisquare.bytemapper.fieldmapper.TooSmallDatatypeException;
 import eu.trisquare.bytemapper.fieldmapper.UnsupportedTypeException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static eu.trisquare.bytemapper.ReflectionHelper.*;
 
@@ -53,11 +56,20 @@ public class ByteMapper {
      *                                             signedness conversion.
      */
     public static <T> T mapValues(Class<T> clazz, ByteBuffer byteBuffer) {
-        final T instance = getInstance(clazz);
-        final Class<?> objectClass = instance.getClass();
-        final Collection<Field> annotatedFields = getValueAnnotatedFields(objectClass);
-        for (Field field : annotatedFields) {
-            mapFieldValue(field, instance, byteBuffer);
+        final T instance;
+        if (hasAnnotatedConstructor(clazz)) {
+            final List<Object> constructorArgs = getAnnotatedConstructorParams(clazz)
+                    .stream()
+                    .map(parameter -> mapParameterValue(parameter, byteBuffer))
+                    .collect(Collectors.toList());
+            instance = getInstanceUsingAnnotatedConstructor(clazz, constructorArgs);
+        } else {
+            instance = getInstanceUsingDefaultConstructor(clazz);
+            final Class<?> objectClass = instance.getClass();
+            final Collection<Field> annotatedFields = getValueAnnotatedFields(objectClass);
+            for (Field field : annotatedFields) {
+                mapFieldValue(field, instance, byteBuffer);
+            }
         }
         return instance;
     }
@@ -80,9 +92,24 @@ public class ByteMapper {
     private static void mapFieldValue(Field field, Object instance, ByteBuffer byteBuffer) {
         final Value valueAnnotation = field.getAnnotation(Value.class);
         final Class<?> fieldType = field.getType();
-        final FieldMapper fieldMapper = mapperProvider.getMapper(fieldType);
+        final Object mappedValue = mapValue(fieldType, valueAnnotation, byteBuffer);
+        setValue(field, instance, mappedValue);
+    }
 
-        final int bufferLimit = byteBuffer.limit();
+    private static Object mapParameterValue(Parameter parameter, ByteBuffer buffer) {
+        final Value valueAnnotation = parameter.getDeclaredAnnotation(Value.class);
+        if (valueAnnotation == null) {
+            throw new IllegalArgumentException("Not annotated parameter in annotated constructor.");
+        }
+        final Class<?> parameterType = parameter.getType();
+        return mapValue(parameterType, valueAnnotation, buffer);
+    }
+
+
+    private static Object mapValue(Class<?> dataType, Value valueAnnotation, ByteBuffer buffer) {
+        final FieldMapper fieldMapper = mapperProvider.getMapper(dataType);
+
+        final int bufferLimit = buffer.limit();
         checkBufferLimit(bufferLimit);
 
         final int startByte = valueAnnotation.startByte();
@@ -91,17 +118,14 @@ public class ByteMapper {
         final int size = valueAnnotation.size();
         checkSize(startByte, size, bufferLimit);
 
-
         final boolean isBigEndian = valueAnnotation.bigEndian();
-        final ByteBuffer workingBuffer = byteBuffer.asReadOnlyBuffer();
-        final Object mappedValue = fieldMapper.getValue(
+        final ByteBuffer workingBuffer = buffer.asReadOnlyBuffer();
+        return fieldMapper.getValue(
                 workingBuffer,
                 isBigEndian,
                 startByte,
                 size
         );
-
-        setValue(field, instance, mappedValue);
     }
 
     /**

@@ -13,7 +13,7 @@ Add following dependency to your projects POM:
 <dependency> 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
-    <version>1.0-RC2</version>
+    <version>1.0-RC3</version>
 </dependency> 
 ```
 For other build tools, please refer [here](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper). 
@@ -21,7 +21,8 @@ You can also download jar files from [here](https://github.com/trisquareeu/bytem
 
 # How to use?
 ## Example
-A picture is worth a thousand words, so let's take a look on this snippet:
+A picture is worth a thousand words, so let's take a look on these two snippets:
+### Annotated fields
 ```java
 public class Main {
     
@@ -66,20 +67,77 @@ public class Main {
     }
 }
 ```
+All fields annotated by `@Value` will be assigned with mapped values. These fields must not be `final` nor `static`. You are obliged to provide accessible,
+default (no-argument) constructor to allow ByteMapper library to create a new instance of given class. 
+
+### Annotated constructor
+```java
+public class Main {
+    
+    public static void main(String[] args){
+        ByteBuffer buffer = ByteBuffer
+                .allocate(16)
+                .put((byte) 0x00)                               //bytes 0 to 1
+                .put((byte) 0xFF)                               //bytes 1 to 2
+                .putShort(Short.MAX_VALUE)                      //bytes 2 to 4
+                .putInt(Integer.MAX_VALUE)                      //bytes 4 to 8
+                .putLong(Long.MAX_VALUE)                        //bytes 8 to 16
+                .flip();
+        //Instantiate object from ByteBuffer content
+        DemoObject object = ByteMapper.mapValues(DemoObject.class, buffer);
+    }
+
+    //inner classes must be declared static to be instantiated
+    private static class DemoObject {   
+        /** Value mapped from byte 0 to 1. */
+        private final boolean booleanValue;
+
+        /** Value mapped from byte 1 to 2 */
+        private final byte byteValue;
+
+        /** Value mapped from byte 2 to 4 */
+        private final short shortValue;
+
+        /** Value mapped from byte 4 to 8 */
+        private final int intValue;
+
+        /** Value mapped from byte 8 to 16 */
+        private final long longValue;
+            
+        @ByteMapperConstructor
+        private DemoObject(
+                @Value(startByte = 0) boolean booleanValue,
+                @Value(startByte = 1) byte byteValue,
+                @Value(startByte = 2, size = 2) short shortValue, 
+                @Value(startByte = 4, size = 4) int intValue,
+                @Value(startByte = 8, size = 8) long longValue
+        ) {
+            this.booleanValue = booleanValue;
+            this.byteValue = byteValue;
+            this.shortValue = shortValue;
+            this.intValue = intValue;
+            this.longValue = longValue;
+        }    
+    }
+}
+```
+If you decide to use annotated constructor, all of its parameters must be annotated by `@Value`. Only one annotated constructor may exists in given
+class, and it's supertypes. If annotated constructor is present, annotations on class fields will be ignored. Otherwise, if no annotated constructor is present, 
+ByteMapper library will try to instantiate class using default (no-argument) constructor and only then will process fields annotations. 
 
 ## Supported types
 Currently, supported types (and it's wrappers) are: 
-* **String** which is created from selected byte range. Size of single character is determined dynamically by UTF-8 standard.
-* **BigInteger** that, in theory, can hold up to Integer.MAX_VALUE bytes of data.
-* **double** encoded in eight-bytes IEEE 754 floating-point value.
-* **float** encoded in four-bytes IEEE 754 floating-point value.
-* **Byte[]** is a slice of datasource content as Byte objects array.
-* **byte[]** is a slice of datasource content. 
-* **long**, which is eight-bytes integer value.
-* **int**, which is four-bytes integer value.
-* **short**, which is two-bytes integer value.
-* **byte** is a one-byte value.
-* **boolean** which is logical false if all selected bytes are zeroes, otherwise is true.
+* **String** - You can map up to Integer.MAX_VALUE bytes of data into a String. Size of single character is determined dynamically by UTF-8 standard. Bytes may be processed in direct or reversed order. See chapter about endianness to get more on this.
+* **BigInteger** - You can map up to Integer.MAX_VALUE bytes of data into a BigInteger. Created instance holds a signed value, but conversion to unsigned is possible. See below note on the signedness for details.
+* **double** - You can map up to eight bytes of IEEE 754 floating-point to a double.
+* **float** - You can map up to four bytes of IEEE 754 floating-point to a float.
+* **Byte[]** - You can map up to Integer.MAX_VALUE bytes of data into an object Byte array. Result is effectively slice of input data in direct or reversed order. See the chapter about endianness to get more on this.
+* **byte[]** - You can map up to Integer.MAX_VALUE bytes of data into a primitive byte array. Result is effectively slice of input data in direct or reversed order. See the chapter about endianness to get more on this.
+* **long** - You can map up to eight bytes of data into a long. Created type is signed. See below note on the signedness if you want to map unsigned value (conclusion: use the BigInteger for unsigned, eight-bytes value and then make in non-negative).
+* **int** - You can map up to four bytes of data into an integer. Created type is signed. See below note on the signedness if you want to map unsigned value (conclusion: use the long for unsigned, four-bytes value, and it will never be negative).
+* **short** - You can map up to two bytes of data into a short. Created type is signed. See below note on the signedness if you want to map unsigned value (conclusion: use the int or the long for unsigned, two-bytes value, and it will never be negative).
+* **byte** - You can map up to one byte of data into byte. Created type is signed. See below note on the signedness if you want to map unsigned value (conclusion: use the short, the int or the long for unsigned, one-byte value, and it will never be negative).
+* **boolean** - You can map up to Integer.MAX_VALUE bytes of data into a boolean. Resulting value will be logical false if all scoped bytes are zeroes, otherwise will be true. This type will ignore the signedness as well as the endianness as not applicable.
 
 Mapper will check if annotated field is assignable by one of above types and then perform conversions from bytes to that
 particular type. If given field is assignable by more than one of listed types, first one will be used. 
