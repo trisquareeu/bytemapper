@@ -31,35 +31,6 @@ public class ByteMapper {
     }
 
     /**
-     * Maps values to {@link Value} annotated fields of provided object instance.
-     * Fields cannot be declared neither static nor final.
-     *
-     * @param instance   class with fields annotated by {@link Value}
-     * @param byteBuffer used as a data source for value mappers
-     * @param <T>        type of processed object
-     * @return same object with values mapped into annotated fields
-     * @throws RuntimeException              when mapper failed to write value into field.
-     * @throws IllegalFieldModifierException when fields is either static or final
-     * @throws EmptyBufferException          when provided buffer is empty
-     * @throws NegativeIndexException        when start byte index is negative
-     * @throws InvalidSizeException          when size is lower than 1 byte
-     * @throws DataExceedsBufferException    when last byte index exceeds buffer limit
-     * @throws UnsupportedTypeException      when unable to determine eligible mapper for given field type
-     * @throws TooSmallDatatypeException     when field data type cannot fit requested size
-     * @throws ArithmeticException           if the value of mapped value will not exactly fit in a datatype due to
-     *                                       signedness conversion.
-     */
-    public static <T> T mapValues(T instance, ByteBuffer byteBuffer) {
-        final Class<?> objectClass = instance.getClass();
-        final Collection<Field> annotatedFields = getValueAnnotatedFields(objectClass);
-        for (Field field : annotatedFields) {
-            mapFieldValue(field, instance, byteBuffer);
-        }
-        return instance;
-
-    }
-
-    /**
      * Creates new instance of provided class and maps values to {@link Value} annotated fields
      * Fields cannot be declared neither static nor final and class must not be non-static inner
      * class. If last constrain is not suitable for your needs, consider using {@link #mapValues(Object, ByteBuffer)}
@@ -84,7 +55,12 @@ public class ByteMapper {
      */
     public static <T> T mapValues(Class<T> clazz, ByteBuffer byteBuffer) {
         final T instance = getInstance(clazz);
-        return mapValues(instance, byteBuffer);
+        final Class<?> objectClass = instance.getClass();
+        final Collection<Field> annotatedFields = getValueAnnotatedFields(objectClass);
+        for (Field field : annotatedFields) {
+            mapFieldValue(field, instance, byteBuffer);
+        }
+        return instance;
     }
 
 

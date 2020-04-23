@@ -36,9 +36,6 @@ public class Main {
                 .flip();
         //Instantiate object from ByteBuffer content
         DemoObject object = ByteMapper.mapValues(DemoObject.class, buffer);
-        //Map fields to update existing object
-        DemoObject object2 = new DemoObject();
-        ByteMapper.mapValues(object2, buffer);
     }
 
     //inner classes must be declared static to be instantiated

@@ -159,33 +159,6 @@ class ByteMapperTest {
         assertEquals(Float.MAX_VALUE, object.floatValue);
     }
 
-    @Test
-    void testMapValuesForExistingObject() {
-        final ByteBuffer buffer = ByteBuffer.allocate(40);
-        buffer.put((byte) 0x00);                       //0
-        buffer.put(Byte.MAX_VALUE);                    //1
-        buffer.putShort(Short.MAX_VALUE);              //2
-        buffer.putInt(Integer.MAX_VALUE);              //4
-        buffer.putLong(Long.MAX_VALUE);                //8
-        buffer.put(TEST_STRING_VALUE.getBytes());      //16
-        buffer.putLong(Long.MAX_VALUE);                //20
-        buffer.putDouble(Double.MAX_VALUE);            //28
-        buffer.putFloat(Float.MAX_VALUE);              //36
-        buffer.flip();
-
-        final TestClasses.ValidMappingClass object = new TestClasses.ValidMappingClass();
-        ByteMapper.mapValues(object, buffer);
-        assertFalse(object.booleanValue);
-        assertEquals(Byte.MAX_VALUE, object.byteValue);
-        assertEquals(Short.MAX_VALUE, object.shortValue);
-        assertEquals(Integer.MAX_VALUE, object.intValue);
-        assertEquals(Long.MAX_VALUE, object.longValue);
-        assertEquals(TEST_STRING_VALUE, object.stringValue);
-        assertEquals(BigInteger.valueOf(Long.MAX_VALUE), object.bigInteger);
-        assertEquals(Double.MAX_VALUE, object.doubleValue);
-        assertEquals(Float.MAX_VALUE, object.floatValue);
-    }
-
     private static class TestClasses {
         private static abstract class AbstractClass {
             public AbstractClass() {
