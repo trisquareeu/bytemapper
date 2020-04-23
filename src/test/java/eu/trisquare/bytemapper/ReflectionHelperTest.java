@@ -91,7 +91,7 @@ class ReflectionHelperTest {
                 () -> ReflectionHelper.getDefaultConstructor(NoPublicConstructor.class)
         );
         assertEquals(
-                "Provided class must have public default constructor and must not be non-static nested class: NoPublicConstructor",
+                "Provided class must have default constructor and must not be non-static nested class: NoPublicConstructor",
                 e.getMessage()
         );
     }
@@ -103,7 +103,7 @@ class ReflectionHelperTest {
                 () -> ReflectionHelper.getDefaultConstructor(NonStaticInnerClass.class)
         );
         assertEquals(
-                "Provided class must have public default constructor and must not be non-static nested class: NonStaticInnerClass",
+                "Provided class must have default constructor and must not be non-static nested class: NonStaticInnerClass",
                 e.getMessage()
         );
     }
@@ -186,7 +186,7 @@ class ReflectionHelperTest {
     }
 
     private static class NoPublicConstructor {
-        private NoPublicConstructor() {
+        private NoPublicConstructor(@SuppressWarnings("unused") Object o1) {
             //empty
         }
     }

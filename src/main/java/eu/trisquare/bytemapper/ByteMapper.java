@@ -33,15 +33,14 @@ public class ByteMapper {
     /**
      * Creates new instance of provided class and maps values to {@link Value} annotated fields
      * Fields cannot be declared neither static nor final and class must not be non-static inner
-     * class. If last constrain is not suitable for your needs, consider using {@link #mapValues(Object, ByteBuffer)}
-     * method instead.
+     * class.
      *
      * @param clazz      with fields annotated by {@link Value} to instantiate. Must not be non-static inner class.
      * @param byteBuffer used as a data source for value mappers
      * @param <T>        type of processed object
      * @return instantiated object with values mapped into annotated fields
      * @throws AbstractClassInstantiationException when provided class is either abstract or interface
-     * @throws NoAccessibleConstructorException    when provided class has no public default constructor
+     * @throws NoAccessibleConstructorException    when provided class has no default constructor
      * @throws IllegalFieldModifierException       when fields is either static or final
      * @throws RuntimeException                    when mapper failed to write value into field or when class cannot be instantiated
      * @throws EmptyBufferException                when provided buffer is empty

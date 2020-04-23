@@ -72,7 +72,7 @@ class ByteMapperTest {
                 ByteMapper.mapValues(TestClasses.NoPublicDefaultConstructor.class, ByteBuffer.allocate(0))
         );
         assertEquals(
-                "Provided class must have public default constructor " +
+                "Provided class must have default constructor " +
                         "and must not be non-static nested class: NoPublicDefaultConstructor",
                 exception.getMessage()
         );
@@ -167,7 +167,7 @@ class ByteMapperTest {
         }
 
         private static class NoPublicDefaultConstructor {
-            private NoPublicDefaultConstructor() {
+            private NoPublicDefaultConstructor(Object o1) {
                 //empty
             }
         }

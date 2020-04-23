@@ -54,7 +54,7 @@ class ReflectionHelper {
      * Returns default constructor of given class
      *
      * @throws AbstractClassInstantiationException when provided class is either abstract or interface
-     * @throws NoAccessibleConstructorException    when provided class has no public default constructor
+     * @throws NoAccessibleConstructorException    when provided class has no default constructor
      */
     static <T> Constructor<T> getDefaultConstructor(Class<T> clazz) {
         if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isInterface()) {
@@ -62,7 +62,7 @@ class ReflectionHelper {
         }
         final Constructor<T> constructor;
         try {
-            constructor = clazz.getConstructor();
+            constructor = clazz.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {
             throw new NoAccessibleConstructorException(clazz);
         }

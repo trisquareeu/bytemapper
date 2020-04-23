@@ -13,7 +13,7 @@ Add following dependency to your projects POM:
 <dependency> 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
-    <version>1.0-RC1</version>
+    <version>1.0-RC2</version>
 </dependency> 
 ```
 For other build tools, please refer [here](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper). 
@@ -60,8 +60,8 @@ public class Main {
         @Value(startByte = 8, size = 8)
         private long longValue;
             
-        public DemoObject() {
-            //instantiated classes must have public default constructor
+        private DemoObject() {
+            //instantiated classes must have default constructor
         }    
     }
 }
