@@ -21,7 +21,8 @@ You can also download jar files from [here](https://github.com/trisquareeu/bytem
 
 # How to use?
 ## Example
-A picture is worth a thousand words, so let's take a look on this snippet:
+A picture is worth a thousand words, so let's take a look on these two snippets:
+### Annotated fields
 ```java
 public class Main {
     
@@ -62,6 +63,57 @@ public class Main {
             
         private DemoObject() {
             //instantiated classes must have default constructor
+        }    
+    }
+}
+```
+### Annotated constructor
+```java
+public class Main {
+    
+    public static void main(String[] args){
+        ByteBuffer buffer = ByteBuffer
+                .allocate(16)
+                .put((byte) 0x00)                               //bytes 0 to 1
+                .put((byte) 0xFF)                               //bytes 1 to 2
+                .putShort(Short.MAX_VALUE)                      //bytes 2 to 4
+                .putInt(Integer.MAX_VALUE)                      //bytes 4 to 8
+                .putLong(Long.MAX_VALUE)                        //bytes 8 to 16
+                .flip();
+        //Instantiate object from ByteBuffer content
+        DemoObject object = ByteMapper.mapValues(DemoObject.class, buffer);
+    }
+
+    //inner classes must be declared static to be instantiated
+    private static class DemoObject {   
+        /** Value mapped from byte 0 to 1. */
+        private final boolean booleanValue;
+
+        /** Value mapped from byte 1 to 2 */
+        private final byte byteValue;
+
+        /** Value mapped from byte 2 to 4 */
+        private final short shortValue;
+
+        /** Value mapped from byte 4 to 8 */
+        private final int intValue;
+
+        /** Value mapped from byte 8 to 16 */
+        private final long longValue;
+            
+        @ByteMapperConstructor
+        private DemoObject(
+                @Value(startByte = 0) boolean booleanValue,
+                @Value(startByte = 1) byte byteValue,
+                @Value(startByte = 2, size = 2) short shortValue, 
+                @Value(startByte = 4, size = 4) int intValue,
+                @Value(startByte = 8, size = 8) long longValue
+        ) {
+            this.booleanValue = booleanValue;
+            this.byteValue = byteValue;
+            this.shortValue = shortValue;
+            this.intValue = intValue;
+            this.longValue = longValue;
         }    
     }
 }
