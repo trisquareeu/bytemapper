@@ -3,9 +3,11 @@ ByteMapper is a java library helping with deserialization of raw byte data into 
 It handles object instantiation and mapping values from bytes into annotated fields. 
 
 [![Build Status](https://travis-ci.com/trisquareeu/bytemapper.svg?branch=master)](https://travis-ci.com/trisquareeu/bytemapper)
-[![Coverage Status](https://coveralls.io/repos/github/trisquareeu/bytemapper/badge.svg?branch=master)](https://coveralls.io/github/trisquareeu/bytemapper?branch=master)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=eu.trisquare%3Abytemapper&metric=coverage)](https://sonarcloud.io/dashboard?id=eu.trisquare%3Abytemapper)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=trisquareeu_bytemapper&metric=alert_status)](https://sonarcloud.io/dashboard?id=trisquareeu_bytemapper)
 [![javadoc](https://javadoc.io/badge2/eu.trisquare/bytemapper/javadoc.svg)](https://javadoc.io/doc/eu.trisquare/bytemapper)
 [![Maven Central](https://img.shields.io/maven-central/v/eu.trisquare/bytemapper.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.trisquare%22%20AND%20a:%22bytemapper%22)
+
 
 # Get ready
 Add following dependency to your projects POM:
@@ -177,7 +179,7 @@ or 65535. If you map it as a short, you'll get signed (-1) value. If you use big
 into Java's object, you have to use BigInteger. You'll get signed value, however. It may be converted to unsigned one by calling
 `BigInteger unsignedBigInteger = new BigInteger(1, signedBigInteger.toByteArray())`. You can find an example for this in test scenarios.
 
-# Licence 
+# License 
 This project is under permissive, MIT license. Please refer to LICENSE file for more details.
 
 # Contribute!

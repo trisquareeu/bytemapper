@@ -1,12 +1,19 @@
+os: linux
+dist: bionic
 language: java
+install: true
 
-after_success:
-  - mvn clean -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID test jacoco:report coveralls:report
-  
+
 addons:
   sonarcloud:
     organization: "trisquareeu"
     token: $sonarkey
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=trisquareeu_bytemapper
+  - mvn clean verify sonar:sonar -Pcoverage
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
