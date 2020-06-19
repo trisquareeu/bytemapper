@@ -1,12 +1,12 @@
-package eu.trisquare.bytemapper;
+package eu.trisquare.bytemapper.classmapper;
 
 import eu.trisquare.bytemapper.annotations.ByteMapperConstructor;
 import eu.trisquare.bytemapper.annotations.Value;
+import eu.trisquare.bytemapper.impl.MappingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ReflectionHelperTest {
+class StandardPOJOAccessorTest {
+
+    private POJOAccessor pojoAccessor = new StandardPOJOAccessor();
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -26,7 +28,7 @@ class ReflectionHelperTest {
     void setValueShouldSetValueForAccessibleFields(String fieldName) throws Exception {
         final TestClass instance = new TestClass();
         Field f = TestClass.class.getDeclaredField(fieldName);
-        ReflectionHelper.setValue(f, instance, Integer.MAX_VALUE);
+        pojoAccessor.assignValue(f, instance, Integer.MAX_VALUE);
         try {
             f.setAccessible(true);
             assertEquals(Integer.MAX_VALUE, f.get(instance));
@@ -45,8 +47,8 @@ class ReflectionHelperTest {
         final TestClass instance = new TestClass();
         Field f = TestClass.class.getDeclaredField(fieldName);
         Exception e = assertThrows(
-                IllegalFieldModifierException.class,
-                () -> ReflectionHelper.setValue(f, instance, Integer.MAX_VALUE)
+                MappingException.class,
+                () -> pojoAccessor.assignValue(f, instance, Integer.MAX_VALUE)
         );
         assertEquals(
                 "Unable to set value for field: " + fieldName + ". Mapped field must not be static nor final.",
@@ -63,14 +65,14 @@ class ReflectionHelperTest {
         Field f = TestClass.class.getDeclaredField(fieldName);
         Exception e = assertThrows(
                 RuntimeException.class,
-                () -> ReflectionHelper.setValue(f, instance, 2.123F)
+                () -> pojoAccessor.assignValue(f, instance, 2.123F)
         );
         assertEquals("Unable to set value for field " + fieldName + ".", e.getMessage());
     }
 
     @Test
     void getAnnotatedFieldsShouldReturnAllFields() {
-        final Set<String> annotated = ReflectionHelper
+        final Set<String> annotated = pojoAccessor
                 .getValueAnnotatedFields(TestClass.class)
                 .stream()
                 .map(Field::getName)
@@ -81,41 +83,42 @@ class ReflectionHelperTest {
         assertEquals(expected, annotated);
     }
 
+
     @Test
-    void getConstructor() {
-        final Constructor<TestClass> constructor = ReflectionHelper.getDefaultConstructor(TestClass.class);
-        assertNotNull(constructor);
+    void getInstance() {
+        final TestClass instance = pojoAccessor.getInstanceUsingDefaultConstructor(TestClass.class);
+        assertNotNull(instance);
     }
 
     @Test
-    void getConstructorShouldThrowWhenNoPublicConstructorAvailable() {
+    void getInstanceShouldThrowWhenNoPublicConstructorAvailable() {
         Exception e = assertThrows(
-                NoAccessibleConstructorException.class,
-                () -> ReflectionHelper.getDefaultConstructor(NoPublicConstructor.class)
+                MappingException.class,
+                () -> pojoAccessor.getInstanceUsingDefaultConstructor(NoPublicConstructor.class)
         );
         assertEquals(
-                "Provided class must have default constructor and must not be non-static nested class: NoPublicConstructor",
+                "Class NoPublicConstructor must have default constructor and must be declared in static context",
                 e.getMessage()
         );
     }
 
     @Test
-    void getConstructorShouldThrowWhenNonStaticInnerClass() {
+    void getInstanceShouldThrowWhenNonStaticInnerClass() {
         Exception e = assertThrows(
-                NoAccessibleConstructorException.class,
-                () -> ReflectionHelper.getDefaultConstructor(NonStaticInnerClass.class)
+                MappingException.class,
+                () -> pojoAccessor.getInstanceUsingDefaultConstructor(NonStaticInnerClass.class)
         );
         assertEquals(
-                "Provided class must have default constructor and must not be non-static nested class: NonStaticInnerClass",
+                "Class NonStaticInnerClass must have default constructor and must be declared in static context",
                 e.getMessage()
         );
     }
 
     @Test
-    void getConstructorShouldThrowWhenAbstractClass() {
+    void getInstanceShouldThrowWhenAbstractClass() {
         Exception e = assertThrows(
-                AbstractClassInstantiationException.class,
-                () -> ReflectionHelper.getDefaultConstructor(AbstractClass.class)
+                MappingException.class,
+                () -> pojoAccessor.getInstanceUsingDefaultConstructor(AbstractClass.class)
         );
         assertEquals(
                 "Provided class must not be interface nor abstract class: AbstractClass",
@@ -124,10 +127,10 @@ class ReflectionHelperTest {
     }
 
     @Test
-    void getConstructorShouldThrowWhenInterface() {
+    void getInstanceShouldThrowWhenInterface() {
         Exception e = assertThrows(
-                AbstractClassInstantiationException.class,
-                () -> ReflectionHelper.getDefaultConstructor(InterfaceClass.class)
+                MappingException.class,
+                () -> pojoAccessor.getInstanceUsingDefaultConstructor(InterfaceClass.class)
         );
         assertEquals(
                 "Provided class must not be interface nor abstract class: InterfaceClass",
@@ -136,16 +139,23 @@ class ReflectionHelperTest {
     }
 
     @Test
-    void getInstance() {
-        final TestClass instance = ReflectionHelper.getInstanceUsingDefaultConstructor(TestClass.class);
-        assertNotNull(instance);
+    void getInstanceShouldThrowWhenAbstractInterface() {
+        Exception e = assertThrows(
+                MappingException.class,
+                () -> pojoAccessor.getInstanceUsingDefaultConstructor(AbstractInterfaceClass.class)
+        );
+        assertEquals(
+                "Provided class must not be interface nor abstract class: AbstractInterfaceClass",
+                e.getMessage()
+        );
     }
+
 
     @Test
     void getInstanceShouldThrowWhenInvocationException() {
         Exception e = assertThrows(
                 RuntimeException.class,
-                () -> ReflectionHelper.getInstanceUsingDefaultConstructor(InvocationExceptionClass.class)
+                () -> pojoAccessor.getInstanceUsingDefaultConstructor(InvocationExceptionClass.class)
         );
         assertEquals(
                 "Class cannot be instantiated.",
@@ -158,7 +168,7 @@ class ReflectionHelperTest {
     void getAnnotatedConstructorParamsShouldThrowWhenNoAnnotatedConstructorPresent() {
         Exception e = assertThrows(
                 IllegalStateException.class,
-                () -> ReflectionHelper.getAnnotatedConstructorParams(NoPublicConstructor.class)
+                () -> pojoAccessor.getAnnotatedConstructorParams(NoPublicConstructor.class)
         );
         assertEquals(
                 "Class must have exactly one annotated constructor.",
@@ -170,7 +180,7 @@ class ReflectionHelperTest {
     void getAnnotatedConstructorParamsShouldThrowWhenMultipleAnnotatedConstructorsPresent() {
         Exception e = assertThrows(
                 IllegalStateException.class,
-                () -> ReflectionHelper.getAnnotatedConstructorParams(TwoAnnotatedConstructors.class)
+                () -> pojoAccessor.getAnnotatedConstructorParams(TwoAnnotatedConstructors.class)
         );
         assertEquals(
                 "Class must have exactly one annotated constructor.",
@@ -181,17 +191,17 @@ class ReflectionHelperTest {
 
     @Test
     void hasAnnotatedConstructorShouldReturnFalseWhenNoAnnotatedConstructor() {
-        assertFalse(ReflectionHelper.hasAnnotatedConstructor(NoPublicConstructor.class));
+        assertFalse(pojoAccessor.hasAnnotatedConstructor(NoPublicConstructor.class));
     }
 
     @Test
     void hasAnnotatedConstructorShouldReturnFalseWhenAnnotatedConstructor() {
-        assertTrue(ReflectionHelper.hasAnnotatedConstructor(TwoAnnotatedConstructors.class));
+        assertTrue(pojoAccessor.hasAnnotatedConstructor(TwoAnnotatedConstructors.class));
     }
 
     @Test
     void getAnnotatedConstructorParamsShouldReturnParameters() {
-        final List<Parameter> params = ReflectionHelper.getAnnotatedConstructorParams(AnnotatedConstructor.class);
+        final List<Parameter> params = pojoAccessor.getAnnotatedConstructorParams(AnnotatedConstructor.class);
         assertEquals(3, params.size());
         assertEquals(Object.class, params.get(0).getType());
         assertEquals(Long.class, params.get(1).getType());
@@ -199,8 +209,8 @@ class ReflectionHelperTest {
     }
 
     @Test
-    void getInstanceUsingAnnotatedConstructorShouldCreateObject(){
-        final AnnotatedConstructor object = ReflectionHelper.getInstanceUsingAnnotatedConstructor(
+    void getInstanceUsingAnnotatedConstructorShouldCreateObject() {
+        final AnnotatedConstructor object = pojoAccessor.getInstanceUsingAnnotatedConstructor(
                 AnnotatedConstructor.class, Arrays.asList("TestString", 123L, false)
         );
         assertNotNull(object);
@@ -210,6 +220,11 @@ class ReflectionHelperTest {
     }
 
     private interface InterfaceClass {
+
+    }
+
+    @SuppressWarnings("UnnecessaryInterfaceModifier")
+    private abstract interface AbstractInterfaceClass {
 
     }
 
@@ -262,7 +277,7 @@ class ReflectionHelperTest {
                 @Value(startByte = 0) Object arg1,
                 @Value(startByte = 1) Long arg2,
                 @Value(startByte = 2) boolean arg3
-        ){
+        ) {
             this.field1 = arg1;
             this.field2 = arg2;
             this.field3 = arg3;
@@ -271,11 +286,11 @@ class ReflectionHelperTest {
 
 
     @SuppressWarnings("unused")
-    private static class NoAnnotatedParameter{
+    private static class NoAnnotatedParameter {
         @ByteMapperConstructor
         private NoAnnotatedParameter(
                 Object arg1
-        ){
+        ) {
             //empty
         }
     }

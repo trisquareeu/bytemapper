@@ -1,10 +1,10 @@
 # Overview
-ByteMapper is a java library helping with deserialization of raw byte data into Plain Old Java Objects (POJO).
-It handles object instantiation and mapping values from bytes into annotated fields. 
+ByteMapper is a java library that helps with deserialization raw bytes data into Plain Old Java Objects (POJO).
+It handles object instantiation and mapping values from bytes into annotated fields or constructor parameters.
 
 [![Build Status](https://travis-ci.com/trisquareeu/bytemapper.svg?branch=master)](https://travis-ci.com/trisquareeu/bytemapper)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=eu.trisquare%3Abytemapper&metric=coverage)](https://sonarcloud.io/dashboard?id=eu.trisquare%3Abytemapper)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=trisquareeu_bytemapper&metric=alert_status)](https://sonarcloud.io/dashboard?id=trisquareeu_bytemapper)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eu.trisquare%3Abytemapper&metric=alert_status)](https://sonarcloud.io/dashboard?id=trisquareeu_bytemapper)
 [![javadoc](https://javadoc.io/badge2/eu.trisquare/bytemapper/javadoc.svg)](https://javadoc.io/doc/eu.trisquare/bytemapper)
 [![Maven Central](https://img.shields.io/maven-central/v/eu.trisquare/bytemapper.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.trisquare%22%20AND%20a:%22bytemapper%22)
 
@@ -15,7 +15,7 @@ Add following dependency to your projects POM:
 <dependency> 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
-    <version>1.0-RC3</version>
+    <version>1.0</version>
 </dependency> 
 ```
 For other build tools, please refer [here](https://maven-badges.herokuapp.com/maven-central/eu.trisquare/bytemapper). 
@@ -29,16 +29,16 @@ A picture is worth a thousand words, so let's take a look on these two snippets:
 public class Main {
     
     public static void main(String[] args){
-        ByteBuffer buffer = ByteBuffer
-                .allocate(16)
-                .put((byte) 0x00)                               //bytes 0 to 1
-                .put((byte) 0xFF)                               //bytes 1 to 2
-                .putShort(Short.MAX_VALUE)                      //bytes 2 to 4
-                .putInt(Integer.MAX_VALUE)                      //bytes 4 to 8
-                .putLong(Long.MAX_VALUE)                        //bytes 8 to 16
-                .flip();
+        final ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.put((byte) 0x00);                               //bytes 0 to 1
+        buffer.put((byte) 0xFF);                               //bytes 1 to 2
+        buffer.putShort(Short.MAX_VALUE);                      //bytes 2 to 4
+        buffer.putInt(Integer.MAX_VALUE);                      //bytes 4 to 8
+        buffer.putLong(Long.MAX_VALUE);                        //bytes 8 to 16
+        buffer.flip();
+
         //Instantiate object from ByteBuffer content
-        DemoObject object = ByteMapper.mapValues(DemoObject.class, buffer);
+        final DemoObject object = new ByteMapperBuilder().build().mapValues(DemoObject.class, buffer);
     }
 
     //inner classes must be declared static to be instantiated
@@ -77,16 +77,16 @@ default (no-argument) constructor to allow ByteMapper library to create a new in
 public class Main {
     
     public static void main(String[] args){
-        ByteBuffer buffer = ByteBuffer
-                .allocate(16)
-                .put((byte) 0x00)                               //bytes 0 to 1
-                .put((byte) 0xFF)                               //bytes 1 to 2
-                .putShort(Short.MAX_VALUE)                      //bytes 2 to 4
-                .putInt(Integer.MAX_VALUE)                      //bytes 4 to 8
-                .putLong(Long.MAX_VALUE)                        //bytes 8 to 16
-                .flip();
+        final ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.put((byte) 0x00);                               //bytes 0 to 1
+        buffer.put((byte) 0xFF);                               //bytes 1 to 2
+        buffer.putShort(Short.MAX_VALUE);                      //bytes 2 to 4
+        buffer.putInt(Integer.MAX_VALUE);                      //bytes 4 to 8
+        buffer.putLong(Long.MAX_VALUE);                        //bytes 8 to 16
+        buffer.flip();
+
         //Instantiate object from ByteBuffer content
-        DemoObject object = ByteMapper.mapValues(DemoObject.class, buffer);
+        final DemoObject object = new ByteMapperBuilder().build().mapValues(DemoObject.class, buffer);
     }
 
     //inner classes must be declared static to be instantiated
@@ -120,6 +120,71 @@ public class Main {
             this.intValue = intValue;
             this.longValue = longValue;
         }    
+    }
+}
+```
+If you decide to use annotated constructor, all of its parameters must be annotated by `@Value`. Only one annotated constructor may exists in given
+class, and it's supertypes. If annotated constructor is present, annotations on class fields will be ignored. Otherwise, if no annotated constructor is present, 
+ByteMapper library will try to instantiate class using default (no-argument) constructor and only then will process fields annotations. 
+
+### Inner structures
+```java
+public class Main {
+    
+    public static void main(String[] args){
+        final ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.put((byte) 0x00);                               //bytes 0 to 1
+        buffer.put((byte) 0xFF);                               //bytes 1 to 2
+        buffer.putShort(Short.MAX_VALUE);                      //bytes 2 to 4
+        buffer.putInt(Integer.MAX_VALUE);                      //bytes 4 to 8
+        buffer.putLong(Long.MAX_VALUE);                        //bytes 8 to 16
+        buffer.flip();
+
+        //Instantiate object from ByteBuffer content
+        final DemoObject object = new ByteMapperBuilder().build().mapValues(DemoObject.class, buffer);
+    }
+    
+    //inner classes must be declared static to be instantiated
+    private static class DemoObject{
+        @Structure(startByte = 0, size = 16)
+        private DemoStructure object;
+
+        private DemoObject(){
+            //instantiated classes must have default constructor
+        }
+    }
+
+    //inner classes must be declared static to be instantiated
+    private static class DemoStructure {
+        /** Value mapped from byte 0 to 1. */
+        private final boolean booleanValue;
+
+        /** Value mapped from byte 1 to 2 */
+        private final byte byteValue;
+
+        /** Value mapped from byte 2 to 4 */
+        private final short shortValue;
+
+        /** Value mapped from byte 4 to 8 */
+        private final int intValue;
+
+        /** Value mapped from byte 8 to 16 */
+        private final long longValue;
+
+        @ByteMapperConstructor
+        private DemoStructure(
+                @Value(startByte = 0) boolean booleanValue,
+                @Value(startByte = 1) byte byteValue,
+                @Value(startByte = 2, size = 2) short shortValue,
+                @Value(startByte = 4, size = 4) int intValue,
+                @Value(startByte = 8, size = 8) long longValue
+        ) {
+            this.booleanValue = booleanValue;
+            this.byteValue = byteValue;
+            this.shortValue = shortValue;
+            this.intValue = intValue;
+            this.longValue = longValue;
+        }
     }
 }
 ```

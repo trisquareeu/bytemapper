@@ -1,5 +1,6 @@
 package eu.trisquare.bytemapper.fieldmapper;
 
+import eu.trisquare.bytemapper.impl.MappingException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SingleValueFieldMapperTest {
 
-    private final FieldMapperProvider mapperProvider = new FieldMapperProvider();
+    private final StandardFieldMapperProvider mapperProvider = new StandardFieldMapperProvider();
 
     @Test
     void mappingShouldWorkForPrimitiveBoolean() {
@@ -62,7 +63,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Byte.MAX_VALUE, b2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 2)
         );
         assertEquals(
@@ -89,7 +90,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Byte.MAX_VALUE, b2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 2)
         );
         assertEquals(
@@ -116,7 +117,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Short.reverseBytes(Short.MAX_VALUE), s2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 3)
         );
         assertEquals(
@@ -143,7 +144,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Short.reverseBytes(Short.MAX_VALUE), s2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 3)
         );
         assertEquals(
@@ -171,7 +172,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Integer.reverseBytes(Integer.MAX_VALUE), i2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 5)
         );
         assertEquals(
@@ -198,7 +199,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Integer.reverseBytes(Integer.MAX_VALUE), i2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 5)
         );
         assertEquals(
@@ -226,7 +227,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Long.reverseBytes(Long.MAX_VALUE), i2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 9)
         );
         assertEquals(
@@ -253,7 +254,7 @@ class SingleValueFieldMapperTest {
         assertEquals(Long.reverseBytes(Long.MAX_VALUE), i2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 9)
         );
         assertEquals(
@@ -286,7 +287,7 @@ class SingleValueFieldMapperTest {
         assertEquals(reversed, f2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 5)
         );
         assertEquals(
@@ -318,7 +319,7 @@ class SingleValueFieldMapperTest {
         assertEquals(reversed, f2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 5)
         );
         assertEquals(
@@ -350,7 +351,7 @@ class SingleValueFieldMapperTest {
         assertEquals(reversed, d2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 9)
         );
         assertEquals(
@@ -382,7 +383,7 @@ class SingleValueFieldMapperTest {
         assertEquals(reversed, d2);
 
         final Exception e = assertThrows(
-                TooSmallDatatypeException.class,
+                MappingException.class,
                 () -> mapper.getValue(buffer, true, 0, 9)
         );
         assertEquals(

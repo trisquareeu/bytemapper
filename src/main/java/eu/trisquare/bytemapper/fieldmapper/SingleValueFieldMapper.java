@@ -47,8 +47,6 @@ class SingleValueFieldMapper implements FieldMapper {
 
     /**
      * {@inheritDoc}
-     *
-     * @throws TooSmallDatatypeException when data type cannot fit requested amount of bytes
      */
     @Override
     public Object getValue(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
@@ -60,11 +58,16 @@ class SingleValueFieldMapper implements FieldMapper {
      * Checks if given amount of bytes is valid for mapped data type
      *
      * @param requestedSize is amount of bytes to map into value
-     * @throws TooSmallDatatypeException when data type cannot fit requested amount of bytes
      */
     protected void checkSize(int requestedSize) {
         if (requestedSize > maximumSupportedSize) {
-            throw new TooSmallDatatypeException(returnedType, maximumSupportedSize, requestedSize);
+            final String message = String.format(
+                    "For type %s maximum allowed size is %d, but requested parsing of %d bytes. Would you like to use different data type?",
+                    returnedType.getSimpleName(),
+                    maximumSupportedSize,
+                    requestedSize
+            );
+            throw new FieldMappingException(message);
         }
     }
 

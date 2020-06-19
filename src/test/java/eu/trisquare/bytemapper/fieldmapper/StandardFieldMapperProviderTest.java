@@ -1,5 +1,6 @@
 package eu.trisquare.bytemapper.fieldmapper;
 
+import eu.trisquare.bytemapper.impl.MappingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -9,9 +10,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FieldMapperProviderTest {
+class StandardFieldMapperProviderTest {
 
-    private final FieldMapperProvider mapperProvider = new FieldMapperProvider();
+    private final StandardFieldMapperProvider mapperProvider = new StandardFieldMapperProvider();
 
     private static Stream<Class<?>> classesProvider() {
         return Stream.of(
@@ -30,7 +31,7 @@ class FieldMapperProviderTest {
     @Test
     void getMapperShouldThrowForUnsupportedType() {
         Exception e = assertThrows(
-                UnsupportedTypeException.class,
+                MappingException.class,
                 () -> mapperProvider.getMapper(Class.class)
         );
         assertEquals("No mapper has been found for class: java.lang.Class", e.getMessage());
@@ -56,4 +57,5 @@ class FieldMapperProviderTest {
         assertNotNull(mapper);
         assertTrue(mapper.isEligible(BigInteger.class));
     }
+
 }

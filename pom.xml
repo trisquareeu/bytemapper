@@ -6,12 +6,12 @@
 
     <groupId>eu.trisquare</groupId>
     <artifactId>bytemapper</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
     <name>bytemapper</name>
     <description>
-        ByteMapper is a java library helping with deserialization of raw byte data into Plain Old Java Objects (POJO).
-        It handles object instantiation and mapping values from bytes into annotated fields.
+        ByteMapper is a java library that helps with deserialization raw bytes data into Plain Old Java Objects (POJO).
+        It handles object instantiation and mapping values from bytes into annotated fields or constructor parameters.
     </description>
 
     <url>https://github.com/trisquareeu/bytemapper</url>

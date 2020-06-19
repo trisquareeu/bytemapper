@@ -1,7 +1,9 @@
 package eu.trisquare.bytemapper;
 
+import eu.trisquare.bytemapper.annotations.Structure;
 import eu.trisquare.bytemapper.annotations.Value;
-import eu.trisquare.bytemapper.fieldmapper.UnsupportedTypeException;
+import eu.trisquare.bytemapper.impl.ByteMapperBuilder;
+import eu.trisquare.bytemapper.impl.MappingException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -13,26 +15,32 @@ class ByteMapperAnnotatedFieldsTest {
 
     private static final String TEST_STRING_VALUE = "1234";
 
+    private final ByteMapper mapper = new ByteMapperBuilder().build();
+
+
     @Test
     void mapValuesShouldThrowExceptionWhenEmptyBuffer() {
-        final Exception exception = assertThrows(EmptyBufferException.class, () ->
-                ByteMapper.mapValues(TestClasses.ValidMappingClass.class, ByteBuffer.allocate(0))
+        final ByteBuffer buffer = ByteBuffer.allocate(0);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.ValidMappingClass.class, buffer)
         );
         assertEquals("Buffer limit must be bigger than 0, but is 0.", exception.getMessage());
     }
 
     @Test
     void mapValuesShouldThrowExceptionWhenUnsupportedType() {
-        final Exception exception = assertThrows(UnsupportedTypeException.class, () ->
-                ByteMapper.mapValues(TestClasses.UnsupportedType.class, ByteBuffer.allocate(0))
+        final ByteBuffer buffer = ByteBuffer.allocate(0);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.UnsupportedType.class, buffer)
         );
         assertEquals("No mapper has been found for class: java.lang.Void", exception.getMessage());
     }
 
     @Test
     void mapValuesShouldThrowExceptionWhenNegativeIdx() {
-        final Exception exception = assertThrows(NegativeIndexException.class, () ->
-                ByteMapper.mapValues(TestClasses.NegativeIndexClass.class, ByteBuffer.allocate(1))
+        final ByteBuffer buffer = ByteBuffer.allocate(1);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.NegativeIndexClass.class, buffer)
         );
         assertEquals(
                 "Byte index must be positive! (-1 was provided)",
@@ -42,8 +50,9 @@ class ByteMapperAnnotatedFieldsTest {
 
     @Test
     void mapValuesShouldThrowExceptionWhenIdxNotLowerThanBufferSize() {
-        final Exception exception = assertThrows(DataExceedsBufferException.class, () ->
-                ByteMapper.mapValues(TestClasses.ValidMappingClass.class, ByteBuffer.allocate(1))
+        final ByteBuffer buffer = ByteBuffer.allocate(1);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.ValidMappingClass.class, buffer)
         );
         assertEquals(
                 "Last byte index should not exceed buffer limit of 1 bytes, but 2 was calculated",
@@ -56,7 +65,7 @@ class ByteMapperAnnotatedFieldsTest {
         final ByteBuffer buffer = ByteBuffer.allocate(TEST_STRING_VALUE.length());
         buffer.put(TEST_STRING_VALUE.getBytes());     //bytes 0-4
         buffer.flip();
-        TestClasses.UnknownTypeClass obj = ByteMapper.mapValues(TestClasses.UnknownTypeClass.class, buffer);
+        TestClasses.UnknownTypeClass obj = mapper.mapValues(TestClasses.UnknownTypeClass.class, buffer);
 
         assertTrue(obj.object instanceof String);
         assertEquals(
@@ -67,20 +76,21 @@ class ByteMapperAnnotatedFieldsTest {
 
     @Test
     void mapValuesShouldThrowExceptionWhenNoPublicDefaultConstructor() {
-        final Exception exception = assertThrows(NoAccessibleConstructorException.class, () ->
-                ByteMapper.mapValues(TestClasses.NoPublicDefaultConstructor.class, ByteBuffer.allocate(0))
+        final ByteBuffer buffer = ByteBuffer.allocate(0);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.NoPublicDefaultConstructor.class, buffer)
         );
         assertEquals(
-                "Provided class must have default constructor " +
-                        "and must not be non-static nested class: NoPublicDefaultConstructor",
+                "Class NoPublicDefaultConstructor must have default constructor and must be declared in static context",
                 exception.getMessage()
         );
     }
 
     @Test
     void mapValuesShouldThrowExceptionWhenAbstract() {
-        final Exception exception = assertThrows(AbstractClassInstantiationException.class, () ->
-                ByteMapper.mapValues(TestClasses.AbstractClass.class, ByteBuffer.allocate(0))
+        final ByteBuffer buffer = ByteBuffer.allocate(0);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.AbstractClass.class, buffer)
         );
         assertEquals(
                 "Provided class must not be interface nor abstract class: AbstractClass",
@@ -90,8 +100,9 @@ class ByteMapperAnnotatedFieldsTest {
 
     @Test
     void mapValuesShouldThrowExceptionWhenNegativeSize() {
-        final Exception exception = assertThrows(InvalidSizeException.class, () ->
-                ByteMapper.mapValues(TestClasses.NegativeSizeClass.class, ByteBuffer.allocate(1))
+        final ByteBuffer buffer = ByteBuffer.allocate(1);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.NegativeSizeClass.class, buffer)
         );
         assertEquals(
                 "Size should be bigger than 0, but -1 was provided",
@@ -101,8 +112,9 @@ class ByteMapperAnnotatedFieldsTest {
 
     @Test
     void mapValuesShouldThrowExceptionWhenSizeExceedsBuffer() {
-        final Exception exception = assertThrows(DataExceedsBufferException.class, () ->
-                ByteMapper.mapValues(TestClasses.SizeExceedsBuffer.class, ByteBuffer.allocate(1))
+        final ByteBuffer buffer = ByteBuffer.allocate(1);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.SizeExceedsBuffer.class, buffer)
         );
         assertEquals(
                 "Last byte index should not exceed buffer limit of 1 bytes, but 8 was calculated",
@@ -112,8 +124,9 @@ class ByteMapperAnnotatedFieldsTest {
 
     @Test
     void mapValuesShouldThrowExceptionWhenFieldIsFinal() {
-        final Exception exception = assertThrows(IllegalFieldModifierException.class, () ->
-                ByteMapper.mapValues(TestClasses.FinalField.class, ByteBuffer.allocate(1))
+        final ByteBuffer buffer = ByteBuffer.allocate(1);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.FinalField.class, buffer)
         );
         assertEquals(
                 "Unable to set value for field: booleanValue. Mapped field must not be static nor final.",
@@ -123,8 +136,9 @@ class ByteMapperAnnotatedFieldsTest {
 
     @Test
     void mapValuesShouldThrowExceptionWhenFieldIsStatic() {
-        final Exception exception = assertThrows(IllegalFieldModifierException.class, () ->
-                ByteMapper.mapValues(TestClasses.StaticField.class, ByteBuffer.allocate(1))
+        final ByteBuffer buffer = ByteBuffer.allocate(1);
+        final Exception exception = assertThrows(MappingException.class, () ->
+                mapper.mapValues(TestClasses.StaticField.class, buffer)
         );
         assertEquals(
                 "Unable to set value for field: booleanValue. Mapped field must not be static nor final.",
@@ -146,7 +160,7 @@ class ByteMapperAnnotatedFieldsTest {
         buffer.putFloat(Float.MAX_VALUE);                 //36
         buffer.flip();
 
-        final TestClasses.ValidMappingClass object = ByteMapper.mapValues(TestClasses.ValidMappingClass.class, buffer);
+        final TestClasses.ValidMappingClass object = mapper.mapValues(TestClasses.ValidMappingClass.class, buffer);
         assertFalse(object.booleanValue);
         assertEquals(Byte.MAX_VALUE, object.byteValue);
         assertEquals(Short.MAX_VALUE, object.shortValue);
@@ -156,6 +170,50 @@ class ByteMapperAnnotatedFieldsTest {
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE), object.bigInteger);
         assertEquals(Double.MAX_VALUE, object.doubleValue);
         assertEquals(Float.MAX_VALUE, object.floatValue);
+    }
+
+    @Test
+    void testMapValuesWithStructure() {
+        final ByteBuffer buffer = ByteBuffer.allocate(80);
+        buffer.put((byte) 0x00);                          //0
+        buffer.put(Byte.MAX_VALUE);                       //1
+        buffer.putShort(Short.MAX_VALUE);                 //2
+        buffer.putInt(Integer.MAX_VALUE);                 //4
+        buffer.putLong(Long.MAX_VALUE);                   //8
+        buffer.put(TEST_STRING_VALUE.getBytes());         //16
+        buffer.putLong(Long.MAX_VALUE);                   //20
+        buffer.putDouble(Double.MAX_VALUE);               //28
+        buffer.putFloat(Float.MAX_VALUE);                 //36
+        buffer.put((byte) 0x01);                          //40
+        buffer.put(Byte.MIN_VALUE);                       //41
+        buffer.putShort(Short.MIN_VALUE);                 //42
+        buffer.putInt(Integer.MIN_VALUE);                 //44
+        buffer.putLong(Long.MIN_VALUE);                   //48
+        buffer.put(TEST_STRING_VALUE.getBytes());         //56
+        buffer.putLong(Long.MIN_VALUE);                   //60
+        buffer.putDouble(Double.MIN_VALUE);               //68
+        buffer.putFloat(Float.MIN_VALUE);                 //76
+        buffer.flip();
+
+        final TestClasses.ValidStructureMappingClass object = mapper.mapValues(TestClasses.ValidStructureMappingClass.class, buffer);
+        assertFalse(object.obj1.booleanValue);
+        assertEquals(Byte.MAX_VALUE, object.obj1.byteValue);
+        assertEquals(Short.MAX_VALUE, object.obj1.shortValue);
+        assertEquals(Integer.MAX_VALUE, object.obj1.intValue);
+        assertEquals(Long.MAX_VALUE, object.obj1.longValue);
+        assertEquals(TEST_STRING_VALUE, object.obj1.stringValue);
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE), object.obj1.bigInteger);
+        assertEquals(Double.MAX_VALUE, object.obj1.doubleValue);
+        assertEquals(Float.MAX_VALUE, object.obj1.floatValue);
+        assertTrue(object.obj2.booleanValue);
+        assertEquals(Byte.MIN_VALUE, object.obj2.byteValue);
+        assertEquals(Short.MIN_VALUE, object.obj2.shortValue);
+        assertEquals(Integer.MIN_VALUE, object.obj2.intValue);
+        assertEquals(Long.MIN_VALUE, object.obj2.longValue);
+        assertEquals(TEST_STRING_VALUE, object.obj2.stringValue);
+        assertEquals(BigInteger.valueOf(Long.MIN_VALUE), object.obj2.bigInteger);
+        assertEquals(Double.MIN_VALUE, object.obj2.doubleValue);
+        assertEquals(Float.MIN_VALUE, object.obj2.floatValue);
     }
 
     @SuppressWarnings("unused")
@@ -244,6 +302,19 @@ class ByteMapperAnnotatedFieldsTest {
                 //empty
             }
 
+        }
+
+        private static class ValidStructureMappingClass {
+
+            @Structure(startByte = 0, size = 40)
+            private ValidMappingClass obj1;
+
+            @Structure(startByte = 40, size = 40)
+            private ValidMappingClass obj2;
+
+            private ValidStructureMappingClass() {
+                //empty
+            }
         }
 
         private static class ValidMappingClass {
