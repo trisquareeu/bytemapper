@@ -1,5 +1,7 @@
 package eu.trisquare.bytemapper.fieldmapper;
 
+import eu.trisquare.bytemapper.annotations.ByteMapperConstructor;
+import eu.trisquare.bytemapper.annotations.Value;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,8 +11,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StandardTypeMapperTest {
 
@@ -221,4 +222,79 @@ class StandardTypeMapperTest {
         assertArrayEquals(bytes, mapper.toByteObjectArray(buffer, true, 0, bytes.length));
         assertArrayEquals(reversed, mapper.toByteObjectArray(buffer, false, 0, bytes.length));
     }
+
+
+    @Test
+    void toAnnotatedFieldsStructure() {
+        final ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.put((byte) 0);
+        buffer.put(Byte.MAX_VALUE);
+        buffer.putShort(Short.MAX_VALUE);
+        buffer.putInt(Integer.MAX_VALUE);
+        buffer.flip();
+        final AnnotatedFieldsStructureClass result = mapper.toStructure(buffer, AnnotatedFieldsStructureClass.class, 0, 8);
+        assertFalse(result.booleanValue);
+        assertEquals(Byte.MAX_VALUE, result.byteValue);
+        assertEquals(Short.MAX_VALUE, result.shortValue);
+        assertEquals(Integer.MAX_VALUE, result.intValue);
+    }
+
+    @Test
+    void toAnnotatedConstructorStructure() {
+        final ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.put((byte) 0);
+        buffer.put(Byte.MAX_VALUE);
+        buffer.putShort(Short.MAX_VALUE);
+        buffer.putInt(Integer.MAX_VALUE);
+        buffer.flip();
+        final AnnotatedConstructorStructureClass result = mapper.toStructure(buffer, AnnotatedConstructorStructureClass.class, 0, 8);
+        assertFalse(result.booleanValue);
+        assertEquals(Byte.MAX_VALUE, result.byteValue);
+        assertEquals(Short.MAX_VALUE, result.shortValue);
+        assertEquals(Integer.MAX_VALUE, result.intValue);
+    }
+
+    private static class AnnotatedConstructorStructureClass {
+
+        private final boolean booleanValue;
+        private final byte byteValue;
+        private final short shortValue;
+        private final int intValue;
+
+        @ByteMapperConstructor
+        public AnnotatedConstructorStructureClass(
+                @Value(startByte = 0) boolean booleanValue,
+                @Value(startByte = 1) byte byteValue,
+                @Value(startByte = 2, size = 2) short shortValue,
+                @Value(startByte = 4, size = 4) int intValue
+        ) {
+            this.booleanValue = booleanValue;
+            this.byteValue = byteValue;
+            this.shortValue = shortValue;
+            this.intValue = intValue;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static class AnnotatedFieldsStructureClass {
+
+        @Value(startByte = 0)
+        private boolean booleanValue;
+
+        @Value(startByte = 1)
+        private byte byteValue;
+
+        @Value(startByte = 2, size = 2)
+        private short shortValue;
+
+        @Value(startByte = 4, size = 4)
+        private int intValue;
+
+        public AnnotatedFieldsStructureClass() {
+            //empty
+        }
+
+    }
+
+
 }

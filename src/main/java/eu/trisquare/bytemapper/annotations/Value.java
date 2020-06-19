@@ -9,8 +9,8 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
 
 /**
- * Fields decorated with this annotation will be processed by {@link eu.trisquare.bytemapper.ByteMapper}
- * Annotated fields must not be final nor static.
+ * Fields decorated with this annotation will be processed by {@link eu.trisquare.bytemapper.ByteMapper} as a simple
+ * values. Annotated fields must not be final nor static.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({FIELD, PARAMETER})

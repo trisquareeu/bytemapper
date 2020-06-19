@@ -154,4 +154,18 @@ interface TypeMapper {
      * content limited by {@code startByte} and {@code startByte+size}
      */
     Byte[] toByteObjectArray(ByteBuffer buffer, boolean isBigEndian, int startByte, int size);
+
+
+    /**
+     * Gets {@code size} bytes from {@code source}, starting from {@code startByte} and ending on
+     * {@code startByte+size} then converts it to POJO structure.
+     *
+     * @param buffer        source of data to get data from
+     * @param structureType proccesed structure POJO class
+     * @param startByte     position (0-inclusive index) of first scoped byte
+     * @param size          amount of bytes to copy from {@code buffer}
+     * @param <T>           type of processed structure
+     * @return POJO class of type T created from bytebuffer's data slice
+     */
+    <T> T toStructure(ByteBuffer buffer, Class<T> structureType, int startByte, int size);
 }

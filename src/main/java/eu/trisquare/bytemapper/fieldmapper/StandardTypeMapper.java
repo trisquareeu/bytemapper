@@ -1,5 +1,6 @@
 package eu.trisquare.bytemapper.fieldmapper;
 
+import eu.trisquare.bytemapper.impl.ByteMapperBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.math.BigInteger;
@@ -122,6 +123,15 @@ class StandardTypeMapper implements TypeMapper {
     public Byte[] toByteObjectArray(ByteBuffer buffer, boolean isBigEndian, int startByte, int size) {
         final byte[] bytes = readBytes(buffer, isBigEndian, startByte, size);
         return ArrayUtils.toObject(bytes);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T toStructure(ByteBuffer buffer, Class<T> structureType, int startByte, int size) {
+        final ByteBuffer slice = getSlice(size, buffer, true, startByte, size);
+        return new ByteMapperBuilder().build().mapValues(structureType, slice);
     }
 
     /**
